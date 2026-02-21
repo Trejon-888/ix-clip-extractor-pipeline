@@ -1,0 +1,27 @@
+{
+  "name": "ix-clip-extractor-pipeline",
+  "version": "1.0.0",
+  "description": "Automated clip extraction + face-tracking reframe + Remotion video editing pipeline",
+  "type": "module",
+  "scripts": {
+    "studio": "npx remotion studio remotion/index.ts",
+    "render": "npx remotion render remotion/index.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.414",
+    "@remotion/google-fonts": "^4.0.414",
+    "@remotion/media": "4.0.414",
+    "@remotion/noise": "^4.0.417",
+    "@remotion/paths": "^4.0.417",
+    "@remotion/renderer": "4.0.414",
+    "@remotion/transitions": "4.0.414",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.414"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "typescript": "^5.8.3"
+  }
+}

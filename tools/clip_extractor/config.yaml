@@ -1,0 +1,96 @@
+# Clip Extractor Configuration
+# All thresholds tunable without code changes
+
+detection:
+  face:
+    enabled: true
+    min_confidence: 0.5
+    model_selection: 1        # 0=short-range (<2m), 1=full-range (<5m)
+    prefer_largest: true      # Track largest face (closest to camera)
+
+  pose:
+    enabled: true
+    min_confidence: 0.5
+    body_margin_pct: 0.15
+    landmark_weights:
+      nose: 0.4
+      left_shoulder: 0.3
+      right_shoulder: 0.3
+  saliency:
+    enabled: true
+    threshold: 0.4
+    min_area_pct: 0.02
+
+fusion:
+  face_weight: 0.6               # Face detection has highest priority
+  pose_weight: 0.25              # Body framing as secondary signal
+  saliency_weight: 0.15          # Visual focus as tertiary signal
+
+sampling:
+  auto: true                  # Auto-select rate based on video duration
+  frame_rate: 6               # Process every Nth frame (if auto=false)
+  interpolation: "cubic"      # "linear", "cubic", or "nearest"
+
+smoothing:
+  method: "kalman"            # "ema" or "kalman"
+  ema:
+    alpha: 0.12               # Lower = smoother (more lag), higher = more responsive
+  kalman:
+    process_noise: 0.01       # Lower = smoother predictions
+    measurement_noise: 0.1    # Higher = trust predictions more than measurements
+
+scene_detection:
+  enabled: true
+  threshold: 0.15             # Histogram correlation below this = scene change (0.15 = less sensitive)
+  min_interval: 30            # Minimum frames between scene change detections (cooldown)
+
+deadzone:
+  enabled: true
+  threshold_pct: 0.05         # 5% of frame width — don't move unless face moves more
+  vertical_threshold_pct: 0.08
+
+crop:
+  default_format: "9x16"      # "9x16" or "1x1"
+  face_position:
+    x_target: 0.5             # Horizontal: centered
+    y_target: 0.38            # Vertical: face in upper 38% (golden ratio zone)
+  padding:
+    top_pct: 0.15             # Headroom above face
+    bottom_pct: 0.45          # Space below face for body
+  boundary_clamp: true        # Never show black bars
+
+output:
+  codec: "h264"
+  preset: "medium"            # "fast", "medium", "slow"
+  crf: 18                     # Quality (lower = better, 18-23 recommended)
+  use_nvenc: "auto"           # "auto" (detect GPU), "force", "disable"
+  nvenc_preset: "p4"          # NVENC preset (p1=fastest, p7=best quality)
+  scale_output: true          # Scale final output to target resolution
+  generate_debug: false       # Create debug video with detection overlay
+
+speakers:
+  mode: "primary"             # "primary" (largest face), "center" (average all)
+  max_faces: 3
+  switch_threshold: 0.3       # Confidence drop before switching tracked face
+
+# Phase 5: Split-Screen Layout (for multi-person Zoom-like videos)
+split_screen:
+  top_ratio: 0.5              # Top half = 50% of output height (full source view)
+  face_padding_pct: 1.0       # 100% padding — tight per-face crops for podcast-style close-ups
+  merged_padding_pct: 2.5     # 250% padding for screen-share webcam (Option B: head + shoulders framing)
+  min_face_size_pct: 0.0005   # Ignore faces smaller than 0.05% of frame area (Zoom faces are ~0.15-0.3%)
+  merge_distance: 0.20        # Merge faces within 20% distance into one group (Zoom sidebar stacking)
+  background: "blur"           # "black" or "blur" for letterbox areas in top and bottom halves
+
+# Phase 3: Clip Selection Engine
+selection:
+  clip_count: 7               # Target number of clips to extract
+  min_duration: 45            # Minimum clip duration in seconds
+  max_duration: 90            # Maximum clip duration in seconds
+  padding: 1.0               # Breathing room at clip boundaries (seconds)
+  anchor:
+    search_window_sec: 15.0   # Search ±N seconds around estimated timestamp
+    min_confidence: 0.5       # Below this, warn user about anchor match
+    fuzzy_threshold: 75       # Minimum rapidfuzz ratio (0-100) for fuzzy match
+  scoring:
+    min_total_score: 50       # Clips below this threshold are flagged
