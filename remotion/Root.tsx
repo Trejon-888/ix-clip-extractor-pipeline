@@ -8,6 +8,15 @@ import { Clip6VoiceControlDemoV3 } from "./compositions/Clip6VoiceControlDemoV3"
 import { ClaudeOpus46Announcement } from "./compositions/ClaudeOpus46Announcement";
 import { CraftingOutreachCampaign } from "./compositions/CraftingOutreachCampaign";
 
+// Pipeline Clips
+import { ClipContentWithoutClients } from "./compositions/ClipContentWithoutClients";
+import { ClipAISkillsDoExactly } from "./compositions/ClipAISkillsDoExactly";
+import { ClipClaudeCodeVisualContent } from "./compositions/ClipClaudeCodeVisualContent";
+import { ClipOnePromptThreePlatforms } from "./compositions/ClipOnePromptThreePlatforms";
+import { ClipAIGeneratedThumbnail } from "./compositions/ClipAIGeneratedThumbnail";
+import { ClipNextVideosAgenticPipeline } from "./compositions/ClipNextVideosAgenticPipeline";
+import { ClipAIHandlesAllContent } from "./compositions/ClipAIHandlesAllContent";
+
 // Word-level timing data
 import { TOTAL_DURATION_FRAMES as CLIP6_V3_DURATION } from "./data/clip6-voice-control-words";
 import { TOTAL_DURATION_FRAMES as CRAFTING_OUTREACH_DURATION } from "./data/crafting-outreach-campaign-words";
@@ -88,6 +97,97 @@ export const RemotionRoot: React.FC = () => {
 
       {/* ── YOUR COMPOSITIONS GO HERE ──────────────────────────── */}
       {/* Register new compositions below. Use gold standards above as templates. */}
+
+      {/* Pipeline Clip: AI Generated Thumbnail with My Face (62s, 11 pop-outs) */}
+      <Composition
+        id="ClipAIGeneratedThumbnail"
+        component={ClipAIGeneratedThumbnail}
+        durationInFrames={1882}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-ai-generated-thumbnail.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: One Prompt → Claude Posted to Three Platforms (82s, 13 pop-outs) */}
+      <Composition
+        id="ClipOnePromptThreePlatforms"
+        component={ClipOnePromptThreePlatforms}
+        durationInFrames={2490}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-one-prompt-three-platforms.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: Claude Code for Visual Content Creation (73s, 14 pop-outs) */}
+      <Composition
+        id="ClipClaudeCodeVisualContent"
+        component={ClipClaudeCodeVisualContent}
+        durationInFrames={2250}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-claude-code-visual-content.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: AI Skills Do Exactly What You Imagine (80s, 13 pop-outs) */}
+      <Composition
+        id="ClipAISkillsDoExactly"
+        component={ClipAISkillsDoExactly}
+        durationInFrames={2410}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-ai-skills-do-exactly.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: Next Videos — Agentic Clip Extractor + Remotion Pipeline (62.5s, 15 pop-outs) */}
+      <Composition
+        id="ClipNextVideosAgenticPipeline"
+        component={ClipNextVideosAgenticPipeline}
+        durationInFrames={1905}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-next-videos-agentic-pipeline.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: AI Handles All My Content Creatives Now (69.4s, 16 pop-outs) */}
+      <Composition
+        id="ClipAIHandlesAllContent"
+        component={ClipAIHandlesAllContent}
+        durationInFrames={2112}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-ai-handles-all-content.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip: "Content without clients is pointless" — iX System reveal (65.9s, 13 pop-outs) */}
+      <Composition
+        id="ClipContentWithoutClients"
+        component={ClipContentWithoutClients}
+        durationInFrames={1977}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-22-claude-creatives/clip-content-without-clients.mp4",
+        }}
+      />
     </>
   );
 };

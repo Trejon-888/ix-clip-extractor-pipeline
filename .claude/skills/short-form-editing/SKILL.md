@@ -18,20 +18,21 @@ Identify the sub-type FIRST. Every decision flows from this.
 
 | Sub-Type | Description | Pop-Out Density | Primary Component | Gold Standard |
 |----------|-------------|----------------|-------------------|---------------|
-| Pipeline clip | Extracted from long-form tutorial | **8-15** | ConceptOverlay (solid-white) | Clip1FromZeroTo90K, Clip2StopManuallyPosting |
-| Standalone demo | Recorded as short-form | **5-7** (2 T1 + 3-5 T2) | AppleStylePopup (T1) + FloatingCard (T2) | Clip6VoiceControlDemoV3 |
-| Announcement | News/reaction | **10-18** | AppleStylePopup | ClaudeOpus46Announcement |
+| Pipeline clip | Extracted from long-form tutorial | **5-8** (A+B tier only) | ConceptOverlay (solid-white) + FloatingKeyword | Clip1FromZeroTo90K (8 pops, ~8s spacing — the comfortable benchmark) |
+| Standalone demo | Recorded as short-form | **4-6** (1-2 T1 + 2-4 T2) | AppleStylePopup (T1) + FloatingCard (T2) | Clip6VoiceControlDemoV3 |
+| Announcement | News/reaction | **8-12** (A+B tier only) | AppleStylePopup + FloatingKeyword | ClaudeOpus46Announcement |
 
 ### Key Parameters by Sub-Type
 
 | Parameter | Pipeline Clip | Standalone Demo | Announcement |
 |-----------|--------------|-----------------|--------------|
-| Pop-outs | 8-15 | 5-7 | 10-18 |
-| Primary component | ConceptOverlay | AppleStylePopup + FloatingCard | AppleStylePopup |
+| Pop-outs | **5-8** (A+B tier scored) | **4-6** | **8-12** (A+B tier scored) |
+| Primary component | ConceptOverlay + FloatingKeyword | AppleStylePopup + FloatingCard | AppleStylePopup + FloatingKeyword |
+| Visual weight mix | 60-70% light/medium, 30-40% heavy | Per tier system | 60-70% light/medium, 30-40% heavy |
 | Caption system | Word captions at `bottom: "28%"` | PhraseCaption (3-5 word chunks) | Word-by-word FullWidthCaption |
 | Zoom | FLAT 1.0 (hook punch only) | Hook punch + subtle 1.0-1.08 | Subtle 1.0-1.08 |
-| SFX events | 15-20 | 5-8 | 10-20 |
-| Max gap | 200 frames | N/A | N/A |
+| SFX events | 8-12 | 5-8 | 10-15 |
+| Min spacing | **210 frames (7s)** between pop-out centers | **210 frames (7s)** | **180 frames (6s)** |
 | illustrationSize | 580-640 | 500 (T1), default (T2) | 500 |
 | CTA | "WATCH THE FULL VIDEO" | "FOLLOW FOR MORE" | Per source type |
 
@@ -86,13 +87,19 @@ Identify the sub-type FIRST. Every decision flows from this.
 
 ### Phase 3: Pop-Out Planning
 
-#### Pipeline Clips (ConceptOverlay-first)
+**FIRST:** Before choosing components, score every potential edit point using the **Impact Score system** from the router SKILL.md. List all moments, assign A/B/C, then plan pop-outs for A-tier and qualifying B-tier only. Assign visual weight: A-tier hero moments → heavy (ConceptOverlay), A-tier brand reveals → medium (FloatingKeyword + crystal box), B-tier → light (FloatingKeyword text-only). Target: 60-70% light/medium, 30-40% heavy.
 
-- Every major concept = full-screen ConceptOverlay (solid-white, clip-circle entrance)
+#### Pipeline Clips (ConceptOverlay + FloatingKeyword)
+
+- A-tier hero moments = full-screen ConceptOverlay (solid-white, clip-circle entrance)
+- A-tier brand/tool reveals = FloatingKeyword with crystal box visual or logo icon
+- B-tier supporting moments = FloatingKeyword text-only in brand orange (#FF7614)
 - illustrationSize: 580-640 (bigger for mobile readability)
 - Platforms pop INDIVIDUALLY with own SFX (not grouped cascade)
-- **RULE:** Every sentence should have at least ONE visual event
-- **RULE:** Max 200 frames between visual events. If gap > 300 frames, add more.
+- **RULE:** Score each pop-out A/B/C using Impact Score. Only A+B get pop-outs.
+- **RULE:** Minimum 210 frames (7 seconds) between pop-out centers. The speaker carrying a point with just captions is NOT a gap — it is good pacing.
+- **RULE:** Target 5-8 pop-outs for a 60-90s pipeline clip. If you have more than 8, you are probably including C-tier moments. Cut them.
+- **RULE:** Gaps of 300+ frames (10s) are acceptable if the speaker is delivering a compelling point. Only fill if a genuine A-tier moment falls in it.
 
 | Duration Type | Frames | Use Case |
 |--------------|--------|----------|
@@ -181,7 +188,9 @@ remotion/compositions/ClipNameComposition.tsx
 5. Verify no pop-out overlaps (endFrame of N < startFrame of N+1)
 6. Verify no SFX collisions (offset by 3 frames)
 7. Verify CONCEPT_RANGES match actual Sequence from/duration
-8. Verify gaps between visual events (pipeline: max 200 frames)
+8. Verify spacing between pop-outs (minimum 210 frames / 7 seconds between centers)
+9. Verify total pop-out count is within format target (pipeline: 5-8, standalone: 4-6, announcement: 8-12)
+10. Verify visual weight mix: 60-70% light/medium (FloatingKeyword), 30-40% heavy (ConceptOverlay/AppleStylePopup)
 
 ---
 
@@ -222,25 +231,29 @@ See `references/pipeline-clips.md` for full pattern code.
 
 ---
 
-## Gap-Filling Strategy (Pipeline Clips)
+## Spacing & Breathing Room (Replaces Gap-Filling)
 
-| Max Gap | Action |
-|---------|--------|
-| < 200 frames | Acceptable |
-| 200-300 frames | Add rapid-fire ConceptOverlays (30f each) |
-| > 300 frames | Mandatory fill -- beyond this is "boring" |
+Pop-outs need breathing room. The speaker's face and voice are the primary content.
 
-**Fill options:**
-1. Rapid-fire ConceptOverlays (30 frames each) for items mentioned in speech
-2. Platform logo displays when platform names are spoken
-3. Feature illustrations for concepts being described
-4. Stagger: overlay -> 20-frame gap -> overlay -> 20-frame gap
+| Spacing | Assessment | Action |
+|---------|-----------|--------|
+| < 210 frames (7s) | **Too dense** | Remove the lower-impact pop-out |
+| 210-450 frames (7-15s) | **Ideal range** | No action needed |
+| 450-600 frames (15-20s) | **Check** | Is there an A-tier moment hiding in this stretch? If yes, add it. If no, leave it. |
+| > 600 frames (20s+) | **Long stretch** | Look for ONE strong B-tier moment to add. If nothing qualifies, accept the gap. |
+
+**NEVER force a pop-out to fill time.** A mediocre illustration interrupting a good speaking moment is worse than no illustration at all.
+
+**Platform name sequences** are the ONE exception where rapid-fire is acceptable: when the speaker names 3+ platforms in quick succession, individual logo pops (30f each) count as a single visual event for spacing purposes.
 
 ---
 
 ## Editorial Philosophy
 
-- **"Noun vs Verb" Rule** -- Visualize CONCEPTS not WORDS (metaphorical > literal)
+- **"Less is More" Rule** — A video with 6 impactful pop-outs and generous breathing room outperforms one with 12 crammed together. When choosing between "add another illustration" and "let the speaker breathe," choose breathing room.
+- **The 7-Second Rule:** After each pop-out exits, the viewer needs at least 7 seconds of just the speaker (with captions) before the next pop-out. This is the minimum for cognitive processing.
+- **Visual Weight Variety** — Mix heavy (ConceptOverlay), medium (crystal box), and light (branded keyword) pop-outs. Uniform full illustrations feel metronomic; varied weights feel dynamic.
+- **"Noun vs Verb" Rule** — Visualize CONCEPTS not WORDS (metaphorical > literal)
 - **Mute Test:** Can the viewer understand the concept without audio?
 - **Squint Test:** Can you see captions while squinting?
 - **Dynamic Pacing:** Vary cut rhythm. Do not make every cut at the same interval.
@@ -272,8 +285,10 @@ See `references/pipeline-clips.md` for full pattern code.
 6. SFX J-cut: **2-3 frames before** visual.
 7. Content videos **MUTED** (`volume={0}`).
 8. Background music at **0.02** volume.
-9. Pipeline clips: **max 200 frames** gap between visual events.
+9. **Minimum 210 frames (7s) spacing** between pop-out centers. Never gap-fill for its own sake.
 10. Real logos always (`Img` + `staticFile()`). NEVER recreate as SVG.
+11. **Impact Score every edit point** (A/B/C) before adding pop-outs. C-tier = no pop-out. B-tier only if spacing allows.
+12. **Visual weight mix:** 60-70% light/medium (FloatingKeyword), 30-40% heavy (ConceptOverlay). See router SKILL.md for hierarchy.
 
 ---
 
@@ -317,4 +332,4 @@ See `references/pipeline-clips.md` for full pattern code.
 
 ---
 
-*Version: 1.0 | Created: 2026-02-12 | Sub-types: pipeline clip, standalone demo, announcement. Gold standards: Clip1FromZeroTo90K (pipeline), Clip6VoiceControlDemoV3 (standalone), ClaudeOpus46Announcement (announcement).*
+*Version: 1.1 | Updated: 2026-02-23 | Visual Restraint: Impact Score (A/B/C), Visual Treatment Hierarchy (heavy/medium/light), 7-second spacing. Density: pipeline 5-8, standalone 4-6, announcement 8-12. Gap-fill replaced with Spacing & Breathing Room.*

@@ -36,6 +36,50 @@ Both sub-skills reference the shared knowledge below. Read this section for comp
 
 ## Shared Knowledge
 
+### Visual Restraint Philosophy (The #1 Editing Rule)
+
+**The biggest mistake is too many pop-outs.** A video with 6 well-chosen illustrations beats one with 12 mediocre ones. The speaker's face and voice are the primary content — pop-outs are punctuation, not the paragraph.
+
+#### Impact Score — Score EVERY potential pop-out before adding:
+
+| Impact | When to Use | Visual Treatment |
+|--------|-------------|-----------------|
+| **A (Must-have)** | Core thesis, hero stat/number, brand reveal, transformation moment, CTA | ALWAYS gets a pop-out |
+| **B (Nice-to-have)** | Supporting evidence, named tools, secondary stats, emotional beats | Pop-out ONLY if 7+ seconds from nearest A-tier |
+| **C (Skip)** | Filler, repeated ideas, transitions, adjectives, obvious statements | NO pop-out — captions + speaker carry it |
+
+**Process:** List all potential edit points → Score each A/B/C → Add all A-tier → Add B-tier only where spacing allows → Never add C-tier. If total exceeds format max, cut weakest B-tier first.
+
+#### Visual Treatment Hierarchy — Not every pop-out needs a full illustration:
+
+| Visual Weight | Component | When to Use | Example |
+|--------------|-----------|-------------|---------|
+| **Heavy** (full illustration) | `ConceptOverlay` / `AppleStylePopup` with custom SVG | A-tier hero moments only: core thesis, transformation, main CTA | Pipeline diagram, architecture visual, hero stat |
+| **Medium** (crystal box) | `FloatingKeyword` with `customVisual` + frosted glass box | A-tier brand reveals, tool mentions with logo | Claude Code logo in glass box, platform icon |
+| **Light** (branded keyword) | `FloatingKeyword` text-only, brand orange `#FF7614` | B-tier supporting moments: named concepts, emotional beats | "INFINITX", "Agent Teams", "SUBSCRIBE" |
+
+**Target mix:** A video should be **60-70% light/medium** and only **30-40% heavy** illustrations.
+
+**Gold standard:** Claude Creatives hook (first 55 seconds) — 4 crystal box visuals + 3 branded keywords + 0 heavy full illustrations. Clean, natural, not overwhelming.
+
+#### Spacing Rules:
+
+- **Minimum 7 seconds (210 frames)** between pop-out centers. Non-negotiable.
+- **Platform name rapid-fire** is the ONE exception — individual logo pops (30f each) count as a single visual event.
+- **Breathing Room Test:** After placing all pop-outs, verify the viewer gets at least 7 seconds of just the speaker (with captions) between each pop-out. If not, remove the least impactful one.
+- **When in doubt, CUT the pop-out.** An empty stretch where the speaker is compelling is better than a mediocre illustration that interrupts flow.
+
+#### Crystal Box Style Specs (Medium weight):
+```
+backgroundColor: rgba(255, 255, 255, 0.14-0.18)
+backdropFilter: blur(16-24px)
+border: 2-3px solid rgba(255, 255, 255, 0.2-0.35)
+borderRadius: 28-32px
+boxShadow: 0 20px 70px rgba(0,0,0,0.5-0.6), inset 0 1px 0 rgba(255,255,255,0.15-0.2)
+```
+
+---
+
 ### Pop-Out Component Library (Current Production)
 
 #### Pop-Out Components
@@ -126,6 +170,7 @@ Both sub-skills reference the shared knowledge below. Read this section for comp
 11. **Pipeline clips: video `volume={1}`.** For pipeline clips (extracted from long-form), the speaker's voice is baked into the video file. Use `volume={1}` on OffthreadVideo, not `volume={0}`.
 12. **Word data MUST be transcribed from the actual video.** Transcribe from the video being rendered, not derived from a parent/master transcript. Extraction padding causes timestamp drift.
 13. **Caption positioning must be verified visually.** Take a screenshot of the video to determine layout type (talking-head vs split-screen) before setting the caption bottom position.
+14. **Score before you add.** Every pop-out must pass the Impact Score (A/B/C). C-tier = no pop-out. Period. And not every pop-out needs a full illustration — use FloatingKeyword for lighter moments.
 
 ---
 
@@ -204,4 +249,4 @@ These files provide additional reference (legacy from V6):
 
 ---
 
-*Version: 7.0 | Updated: 2026-02-12 | Separated from 1459-line monolith into router + long-form-editing + short-form-editing sub-skills. Legacy components deprecated. Terminology: "pop-outs" (not "popups").*
+*Version: 7.1 | Updated: 2026-02-23 | Added Visual Restraint Philosophy: Impact Score (A/B/C), Visual Treatment Hierarchy (heavy/medium/light), 7-second minimum spacing, FloatingKeyword for lighter moments. Crystal box style from Claude Creatives as gold standard.*

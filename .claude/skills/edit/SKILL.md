@@ -39,15 +39,15 @@ Single command to enter the video editing process correctly. Detects format, loa
 
 | Duration | Format | Pop-Out Density | Route To |
 |----------|--------|----------------|----------|
-| **< 90 seconds** | Short-form | **8-15** (pipeline), **5-7** (standalone), **10-18** (announcement) | `.claude/skills/short-form-editing/SKILL.md` |
-| **5+ minutes** | Long-form | **30-40+** | `.claude/skills/long-form-editing/SKILL.md` |
+| **< 90 seconds** | Short-form | **5-8** (pipeline), **4-6** (standalone), **8-12** (announcement) — A+B tier scored | `.claude/skills/short-form-editing/SKILL.md` |
+| **5+ minutes** | Long-form | **20-30** (A+B tier scored) | `.claude/skills/long-form-editing/SKILL.md` |
 
 **Step 2: Load the sub-skill and study the gold standard**
 
 | Format | Sub-Skill | Gold Standard |
 |--------|-----------|---------------|
-| Long-form (5+ min) | `long-form-editing/SKILL.md` | `CraftingOutreachCampaign.tsx` (28min, 35+ pop-outs, V4 illustration-first) |
-| Short-form pipeline | `short-form-editing/SKILL.md` | `Clip1FromZeroTo90K.tsx` (76s, 9 pop-outs) or `Clip2StopManuallyPosting.tsx` (78s, 15 pop-outs) |
+| Long-form (5+ min) | `long-form-editing/SKILL.md` | `CraftingOutreachCampaign.tsx` (28min, 35+ pop-outs) or `ClaudeCreatives.tsx` (FloatingKeyword style) |
+| Short-form pipeline | `short-form-editing/SKILL.md` | `Clip1FromZeroTo90K.tsx` (76s, **8 pop-outs, ~8s spacing** — the comfortable benchmark) |
 | Short-form standalone | `short-form-editing/SKILL.md` | `Clip6VoiceControlDemoV3.tsx` (70s, v2 tier system) |
 | Announcement | `short-form-editing/SKILL.md` | `ClaudeOpus46Announcement.tsx` (130s, 18 pop-outs) |
 
@@ -60,7 +60,7 @@ Single command to enter the video editing process correctly. Detects format, loa
 Follow the loaded sub-skill's phased process in order. Do NOT skip or reorder.
 
 **Long-form (7 phases):**
-1. Transcript Analysis → 30-40+ edit points from WORDS data
+1. Transcript Analysis → Identify edit points, score each A/B/C, select 20-30 (A+B only)
 2. Asset Inventory → real content > illustrations
 3. Pop-Out Planning → V4 illustration-first (ConceptOverlay, 800px, no text default)
 4. Create Illustrations → parallel agents, split files
@@ -69,7 +69,7 @@ Follow the loaded sub-skill's phased process in order. Do NOT skip or reorder.
 7. Assembly & Verification → compile, validate timing
 
 **Short-form (7 phases):**
-1. Transcript Analysis → identify hook, core message, CTA
+1. Transcript Analysis → identify hook, core message, CTA; score each potential pop-out A/B/C
 2. Asset Inventory → logos, audio, source content
 3. Pop-Out Planning → tier system (standalone) or ConceptOverlay-first (pipeline)
 4. Create Illustrations → inline in composition file
@@ -126,6 +126,7 @@ remotion/compositions/{CompositionName}.tsx
 8. **Background music at 0.02** — Never above 0.04
 9. **Content videos muted** — `volume={0}` always
 10. **Pop-out at EXACT frame** keyword is spoken
+11. **Visual Restraint** — Score every pop-out A/B/C before adding. See router SKILL.md for Impact Score + Visual Treatment Hierarchy. When in doubt, cut.
 
 ---
 
@@ -134,7 +135,7 @@ remotion/compositions/{CompositionName}.tsx
 | File | Purpose |
 |------|---------|
 | `.claude/skills/video-editing/SKILL.md` | **Router** — shared component library, rules, brand assets |
-| `.claude/skills/long-form-editing/SKILL.md` | **Long-form process** — V4 illustration-first, 30-40+ pop-outs |
+| `.claude/skills/long-form-editing/SKILL.md` | **Long-form process** — V4 illustration-first, 20-30 scored pop-outs |
 | `.claude/skills/short-form-editing/SKILL.md` | **Short-form process** — pipeline/standalone/announcement |
 | `remotion/compositions/CraftingOutreachCampaign.tsx` | Long-form gold standard |
 | `remotion/compositions/Clip6VoiceControlDemoV3.tsx` | Short-form standalone gold standard |
@@ -152,4 +153,4 @@ remotion/compositions/{CompositionName}.tsx
 
 ---
 
-*Version: 3.0 | Updated: 2026-02-12 | Rewired to 3-skill architecture: router + long-form-editing + short-form-editing. Terminology: "pop-outs". Fixed density: pipeline 8-15, standalone 5-7, long-form 30-40+.*
+*Version: 3.1 | Updated: 2026-02-23 | Visual Restraint: Impact Score (A/B/C) + Visual Treatment Hierarchy (heavy/medium/light). Density: pipeline 5-8, standalone 4-6, announcement 8-12, long-form 20-30. Min spacing: 7 seconds.*
