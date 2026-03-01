@@ -1,7 +1,7 @@
 """Read and write crop_path.json — the inspectable intermediate format."""
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Optional
 
@@ -35,6 +35,8 @@ class CropKeyframe:
     smoother_method: str = "ema"
     # Phase 5: Multi-face data for split-screen layout
     all_faces: str = ""  # JSON: [{"x": 0.2, "y": 0.3, "w": 0.1, "h": 0.15, "conf": 0.9}, ...]
+    # Phase 6: Per-frame layout classification for dynamic podcast reframing
+    layout_type: str = ""  # "split_screen" or "close_up" (empty = unclassified)
 
 
 @dataclass
@@ -63,6 +65,8 @@ class CropPath:
     config_used: str
     detection_stats: DetectionStats
     keyframes: list[CropKeyframe]
+    # Phase 6: Layout segments for dynamic podcast reframing
+    layout_segments: list[dict] = field(default_factory=list)
 
 
 def save_crop_path(crop_path: CropPath, output_file: str) -> None:
@@ -84,6 +88,7 @@ def save_crop_path(crop_path: CropPath, output_file: str) -> None:
         "config_used": crop_path.config_used,
         "detection_stats": asdict(crop_path.detection_stats),
         "keyframes": [asdict(kf) for kf in crop_path.keyframes],
+        "layout_segments": crop_path.layout_segments,
     }
 
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
@@ -108,6 +113,7 @@ def load_crop_path(input_file: str) -> CropPath:
         "saliency_center_x": 0.0, "saliency_center_y": 0.0,
         "scene_change": False, "smoother_method": "ema",
         "all_faces": "",
+        "layout_type": "",
     }
     keyframes = [
         CropKeyframe(**{**_PHASE2_DEFAULTS, **kf})
@@ -127,6 +133,7 @@ def load_crop_path(input_file: str) -> CropPath:
         output_crop_h=out["crop_h"],
         detection_stats=DetectionStats(**stats),
         keyframes=keyframes,
+        layout_segments=data.get("layout_segments", []),
     )
 
 

@@ -67,3 +67,54 @@ To override the crop position for specific moments (e.g., when speaker points at
 3. Re-render: `python -m clip_extractor render --video FILE --crop-path crop_path.json --output FILE`
 
 The renderer linearly interpolates between keyframes, so editing a few keyframes creates smooth transitions to the new position.
+
+## Phase 6 Fields (Dynamic Podcast Layout)
+
+When `--format split` detects mixed layouts (split-screen + close-up), these fields are added:
+
+### `layout_segments` (top-level array)
+
+```json
+{
+  "layout_segments": [
+    {
+      "layout": "split_screen",
+      "start_frame": 0,
+      "end_frame": 405,
+      "start_sec": 0.0,
+      "end_sec": 13.5
+    },
+    {
+      "layout": "close_up",
+      "start_frame": 408,
+      "end_frame": 1626,
+      "start_sec": 13.6,
+      "end_sec": 54.2
+    }
+  ]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `layout_segments[].layout` | string | `"split_screen"` or `"close_up"` |
+| `layout_segments[].start_frame` | int | First frame of this segment |
+| `layout_segments[].end_frame` | int | Last frame of this segment |
+| `layout_segments[].start_sec` | float | Start time in seconds |
+| `layout_segments[].end_sec` | float | End time in seconds |
+
+### `layout_type` (per keyframe)
+
+```json
+{
+  "keyframes": [
+    {
+      "frame": 0,
+      "layout_type": "split_screen",
+      ...other fields...
+    }
+  ]
+}
+```
+
+Empty string (`""`) for backward compatibility with older crop paths.

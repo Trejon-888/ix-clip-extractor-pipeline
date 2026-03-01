@@ -25,7 +25,8 @@ from ..crop.crop_path_io import (
     load_crop_path,
 )
 from ..crop.crop_renderer import render_with_crop_path
-from ..crop.split_renderer import render_split_screen
+from ..crop.split_renderer import render_split_screen, render_dynamic_podcast
+from ..detection.layout_detector import detect_segments, LayoutType
 from ..detection.opencv_face_detector import OpenCVFaceDetector
 from ..utils.video_info import get_video_info
 from ..utils.frame_reader import read_frames, interpolate_positions
@@ -469,7 +470,7 @@ def reframe(
     start_sec: float | None = None,
     end_sec: float | None = None,
 ) -> str:
-    """Full reframe pipeline: extract (optional) → analyze → render.
+    """Full reframe pipeline: extract (optional) -> analyze -> render.
 
     Args:
         video_path: Input video (full source or pre-cut clip).
@@ -503,9 +504,48 @@ def reframe(
         crop_path_output=crop_path_file,
     )
 
-    # Step 2.5: Auto-detect screen-share mode
-    # If face detection is very low, this might be a screen recording with
-    # a small webcam overlay. Scan corners to find it and switch to split layout.
+    # Step 2.5a: Dynamic layout detection for split-screen mode
+    layout_segments = []
+    use_dynamic_layout = False
+
+    if output_format == "split":
+        dynamic_cfg = config.get("split_screen", {}).get("dynamic_layout", {})
+        if dynamic_cfg.get("enabled", True):
+            print(f"\n[clip-extractor] Detecting layout segments...")
+            layout_segments = detect_segments(
+                crop_path.keyframes, crop_path.source_fps, dynamic_cfg,
+            )
+
+            if layout_segments:
+                # Check if we have mixed layouts (both split-screen and close-up)
+                layout_types = set(seg.layout for seg in layout_segments)
+                has_mixed = len(layout_types) > 1
+
+                print(f"  Found {len(layout_segments)} segments:")
+                for seg in layout_segments:
+                    dur = seg.end_sec - seg.start_sec
+                    print(f"    {seg.layout.value}: {seg.start_sec:.1f}s - {seg.end_sec:.1f}s ({dur:.1f}s)")
+
+                if has_mixed:
+                    use_dynamic_layout = True
+                    # Store segments in crop_path for persistence
+                    crop_path.layout_segments = [
+                        {
+                            "layout": seg.layout.value,
+                            "start_frame": seg.start_frame,
+                            "end_frame": seg.end_frame,
+                            "start_sec": round(seg.start_sec, 3),
+                            "end_sec": round(seg.end_sec, 3),
+                        }
+                        for seg in layout_segments
+                    ]
+                    save_crop_path(crop_path, crop_path_file)
+                    print(f"  Mixed layouts detected -- using dynamic renderer")
+                else:
+                    layout_name = layout_segments[0].layout.value
+                    print(f"  All segments are {layout_name} -- using standard renderer")
+
+    # Step 2.5b: Auto-detect screen-share mode (only for non-split formats)
     face_pct = crop_path.detection_stats.face_detected_pct
     use_screenshare_split = False
     webcam_region = None
@@ -524,7 +564,15 @@ def reframe(
 
     print(f"\n[clip-extractor] Rendering: {final_path}")
 
-    if output_format == "split" or use_screenshare_split:
+    if use_dynamic_layout and layout_segments:
+        render_dynamic_podcast(
+            video_path=clip_path,
+            crop_path=crop_path,
+            output_path=final_path,
+            config=config,
+            layout_segments=layout_segments,
+        )
+    elif output_format == "split" or use_screenshare_split:
         render_split_screen(
             video_path=clip_path,
             crop_path=crop_path,

@@ -81,6 +81,14 @@ split_screen:
   min_face_size_pct: 0.0005   # Ignore faces smaller than 0.05% of frame area (Zoom faces are ~0.15-0.3%)
   merge_distance: 0.20        # Merge faces within 20% distance into one group (Zoom sidebar stacking)
   background: "blur"           # "black" or "blur" for letterbox areas in top and bottom halves
+  dynamic_layout:
+    enabled: true               # Auto-detect layout changes in podcast/interview videos
+    face_size_threshold: 0.06   # Faces below this normalized width = gallery/split
+    spatial_spread_threshold: 0.15  # Min horizontal distance between faces for split classification
+    min_segment_duration: 1.0   # Merge segments shorter than this (seconds)
+    smoothing_window: 15        # Majority vote window (keyframes) for noise elimination
+    crossfade_frames: 5         # Transition crossfade duration (frames, ~0.17s at 30fps)
+    mouth_centering: true       # Use MediaPipe mouth landmarks for vertical centering
 
 # Phase 3: Clip Selection Engine
 selection:

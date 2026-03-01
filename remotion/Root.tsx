@@ -16,6 +16,7 @@ import { ClipOnePromptThreePlatforms } from "./compositions/ClipOnePromptThreePl
 import { ClipAIGeneratedThumbnail } from "./compositions/ClipAIGeneratedThumbnail";
 import { ClipNextVideosAgenticPipeline } from "./compositions/ClipNextVideosAgenticPipeline";
 import { ClipAIHandlesAllContent } from "./compositions/ClipAIHandlesAllContent";
+import { PodcastStressExpert } from "./compositions/PodcastStressExpert";
 
 // Word-level timing data
 import { TOTAL_DURATION_FRAMES as CLIP6_V3_DURATION } from "./data/clip6-voice-control-words";
@@ -186,6 +187,21 @@ export const RemotionRoot: React.FC = () => {
         height={RESOLUTIONS.portrait.height}
         defaultProps={{
           videoSrc: "videos/2026-02-22-claude-creatives/clip-content-without-clients.mp4",
+        }}
+      />
+
+      {/* ── PODCAST TEST ──────────────────────────────────────── */}
+
+      {/* Podcast Test: "The Stress Expert" — Leadership & Vulnerability (120s, 9 pop-outs) */}
+      <Composition
+        id="PodcastStressExpert"
+        component={PodcastStressExpert}
+        durationInFrames={3600}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-23-podcast-test/reframed-split.mp4",
         }}
       />
     </>

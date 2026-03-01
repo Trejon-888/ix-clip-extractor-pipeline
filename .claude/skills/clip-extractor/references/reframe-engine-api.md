@@ -96,6 +96,55 @@ load_crop_path(input_file: str) -> CropPath
 render_with_crop_path(video_path, crop_path, output_path, config) -> None
 ```
 
+### Layout Detection (`detection/layout_detector.py`)
+
+```python
+class LayoutType(Enum):
+    SPLIT_SCREEN = "split_screen"
+    CLOSE_UP = "close_up"
+
+@dataclass
+class LayoutSegment:
+    layout: LayoutType
+    start_frame: int
+    end_frame: int
+    start_sec: float
+    end_sec: float
+
+# Classify a single frame by face data
+classify_frame(
+    faces: list[dict],           # all_faces from CropKeyframe
+    face_size_thresh: float = 0.06,
+    spread_thresh: float = 0.15,
+) -> LayoutType
+
+# Detect layout segments across entire video
+detect_segments(
+    keyframes: list[CropKeyframe],
+    fps: float,
+    config: dict = {},           # dynamic_layout config section
+) -> list[LayoutSegment]
+```
+
+### Dynamic Split Renderer (`crop/split_renderer.py`)
+
+```python
+# Standard static split (existing)
+render_split_screen(video_path, crop_path, output_path, config) -> None
+
+# Dynamic podcast layout (Phase 6)
+render_dynamic_podcast(
+    video_path: str,
+    crop_path: CropPath,
+    output_path: str,
+    config: dict,
+    layout_segments: list[LayoutSegment],
+) -> None
+# Split-screen segments: per-frame DNN face detection, Kalman smoothing
+# Close-up segments: standard 9:16 crop from keyframes
+# Transitions: alpha crossfade between layout modes
+```
+
 ### Utils (`utils/`)
 
 ```python

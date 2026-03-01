@@ -58,17 +58,49 @@ def cmd_render(args: argparse.Namespace) -> None:
     if fmt == "split":
         from .core.config_loader import load_config
         from .crop.crop_path_io import load_crop_path
-        from .crop.split_renderer import render_split_screen
+        from .crop.split_renderer import render_split_screen, render_dynamic_podcast
+        from .detection.layout_detector import LayoutSegment, LayoutType
 
         config = load_config(getattr(args, "config", None))
         crop_path = load_crop_path(args.crop_path)
         print(f"\n[clip-extractor] Rendering split-screen from crop path: {args.crop_path}")
-        render_split_screen(
-            video_path=args.video,
-            crop_path=crop_path,
-            output_path=args.output,
-            config=config,
-        )
+
+        # Check for dynamic layout segments in the crop path
+        if crop_path.layout_segments:
+            segments = [
+                LayoutSegment(
+                    layout=LayoutType(seg["layout"]),
+                    start_frame=seg["start_frame"],
+                    end_frame=seg["end_frame"],
+                    start_sec=seg.get("start_sec", seg["start_frame"] / crop_path.source_fps),
+                    end_sec=seg.get("end_sec", seg["end_frame"] / crop_path.source_fps),
+                )
+                for seg in crop_path.layout_segments
+            ]
+            layout_types = {seg.layout for seg in segments}
+            if len(layout_types) > 1:
+                print(f"  Dynamic layout: {len(segments)} segments detected")
+                render_dynamic_podcast(
+                    video_path=args.video,
+                    crop_path=crop_path,
+                    output_path=args.output,
+                    config=config,
+                    layout_segments=segments,
+                )
+            else:
+                render_split_screen(
+                    video_path=args.video,
+                    crop_path=crop_path,
+                    output_path=args.output,
+                    config=config,
+                )
+        else:
+            render_split_screen(
+                video_path=args.video,
+                crop_path=crop_path,
+                output_path=args.output,
+                config=config,
+            )
         result = args.output
     else:
         result = render_from_crop_path(

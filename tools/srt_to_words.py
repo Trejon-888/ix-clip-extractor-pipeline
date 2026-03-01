@@ -12,7 +12,7 @@ def parse_srt(path):
             continue
         ts = lines[1]
         word = ' '.join(lines[2:]).strip()
-        m = re.match(r'(\d+):(\d+):(\d+),(\d+)\s*-->\s*(\d+):(\d+):(\d+),(\d+)', ts)
+        m = re.match(r'(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)', ts)
         if not m:
             continue
         start = int(m[1])*3600 + int(m[2])*60 + int(m[3]) + int(m[4])/1000

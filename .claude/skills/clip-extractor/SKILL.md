@@ -28,6 +28,7 @@ The reframer auto-detects the appropriate layout based on video content:
 | **9x16 face-track** | Face detection ≥ 15% | — (single crop) | — (single crop) | Talking head, vlog, direct-to-camera |
 | **1x1 face-track** | `--format 1x1` | — (square crop) | — (square crop) | Instagram feed, LinkedIn |
 | **Split: multi-face** | `--format split` | Full 16:9 source | Side-by-side face close-ups | Zoom calls, interviews, podcasts |
+| **Split: dynamic podcast** | `--format split` + mixed layouts | Layout-aware per-segment | Layout-aware per-segment | Podcasts, interviews with camera switching |
 | **Split: screen-share** | Auto (face < 15%, webcam found) | Full screen share | Webcam face enlarged | Tutorials, demos, screen recordings |
 
 ### Auto-Detection Flow
@@ -68,6 +69,42 @@ For screen recordings with a small webcam overlay (OBS, Zoom share, etc.):
 5. MediaPipe face landmarker fine-tunes vertical centering
 
 **Config:** `screenshare` section in `config.yaml`
+
+### Dynamic Podcast Layout Detection (Phase 6)
+
+For podcasts and interviews where the source camera **switches between gallery view and close-up**, the reframer auto-detects layout changes and renders each segment appropriately.
+
+**How it works:**
+1. During `analyze()`, face data (`all_faces`) is stored per keyframe via OpenCV DNN
+2. `layout_detector.py` classifies each keyframe by **face size** (primary) + **spatial spread** (secondary):
+   - `SPLIT_SCREEN`: 2+ faces, median face width < 0.06, horizontal spread > 0.15
+   - `CLOSE_UP`: faces with median width > 0.04, horizontal spread < 0.12
+3. Majority-vote smoothing (15-keyframe window) eliminates single-frame noise
+4. Short segments (< 1.0s) are merged into neighbors
+5. **Zero extra video scan** — reuses existing detection data
+
+**Rendering per segment:**
+- **Split-screen segments**: Per-frame DNN face detection, per-speaker Kalman smoothing, smart cropping (each speaker fills their half, no overlap), mouth-centered vertically
+- **Close-up segments**: Standard 9:16 face-tracking crop from keyframes
+- **Transitions**: 5-frame alpha crossfade between layout modes
+
+**Anti-jitter measures:**
+- Kalman filter: `process_noise=0.001`, `measurement_noise=0.15` (trusts predictions 150x more than raw detections)
+- 1.2% deadzone: ignores face movements smaller than 1.2% of frame width
+- Speaker identity tracking: nearest-neighbor matching prevents speaker swaps
+
+**Config:** `split_screen.dynamic_layout` section in `config.yaml`
+
+```yaml
+dynamic_layout:
+  enabled: true
+  face_size_threshold: 0.06      # Faces below this = gallery/split
+  spatial_spread_threshold: 0.15  # Min H-distance between faces for split
+  min_segment_duration: 1.0      # Merge segments shorter than this (seconds)
+  smoothing_window: 15           # Majority vote window (keyframes)
+  crossfade_frames: 5            # Transition crossfade duration
+  mouth_centering: true          # Use MediaPipe mouth landmarks
+```
 
 ## Architecture
 
@@ -168,7 +205,7 @@ Standard evolution check.
 
 ```bash
 # Full pipeline (most common)
-python -m clip_extractor reframe --video FILE --output DIR [--start SEC --end SEC] [--format 9x16|1x1]
+python -m clip_extractor reframe --video FILE --output DIR [--start SEC --end SEC] [--format 9x16|1x1|split]
 
 # Analyze only (inspect crop_path.json first)
 python -m clip_extractor analyze --video FILE [--output FILE]
@@ -217,6 +254,9 @@ Edit `tools/clip_extractor/config.yaml` to adjust behavior without code changes.
 | `deadzone.threshold_pct` | 0.05 | Lower = more responsive. Try 0.03 for animated speakers |
 | `output.crf` | 18 | Lower = higher quality, bigger file. 18-23 recommended |
 | `output.use_nvenc` | auto | "force" for GPU, "disable" for CPU-only |
+| `split_screen.dynamic_layout.face_size_threshold` | 0.06 | Lower = more frames classified as split-screen |
+| `split_screen.dynamic_layout.smoothing_window` | 15 | Higher = more stable segment boundaries |
+| `split_screen.dynamic_layout.crossfade_frames` | 5 | Frames for layout transition crossfade |
 
 ## Non-Negotiable Rules
 
@@ -254,5 +294,5 @@ Clip selection from transcript analysis is planned but not yet built. When ready
 3. Did the user manually edit crop_path.json? → Analyze what they changed as a pattern
 4. Did rendering fail or produce artifacts? → Document the fix
 
-**Version:** 1.0
-**Status:** Phase 1 MVP
+**Version:** 2.0
+**Status:** Phase 6 — Dynamic Podcast Layout Detection

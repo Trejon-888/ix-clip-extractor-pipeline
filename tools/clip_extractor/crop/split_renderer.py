@@ -749,3 +749,474 @@ def render_split_screen(
         os.unlink(stderr_file.name)
 
     print(f"  Render complete (split-screen): {output_path}")
+
+
+# --- Phase 6: Dynamic Podcast Layout Rendering ---
+
+
+class _SimpleKalman:
+    """Lightweight 1D Kalman filter for smooth face position tracking."""
+
+    def __init__(self, process_noise: float = 0.001, measurement_noise: float = 0.15):
+        self.x: float | None = None
+        self.p: float = 1.0
+        self.q = process_noise
+        self.r = measurement_noise
+
+    def update(self, measurement: float) -> float:
+        if self.x is None:
+            self.x = measurement
+            return self.x
+        self.p += self.q
+        k = self.p / (self.p + self.r)
+        self.x += k * (measurement - self.x)
+        self.p *= (1 - k)
+        return self.x
+
+    def reset(self):
+        self.x = None
+        self.p = 1.0
+
+
+class _SpeakerTracker:
+    """Track two speakers across frames with Kalman-smoothed positions.
+
+    Assigns detected faces to consistent speaker identities using
+    nearest-neighbor matching. Speaker 0 = leftmost face in first detection,
+    Speaker 1 = rightmost.
+    """
+
+    DEADZONE = 0.012  # Ignore face movements smaller than 1.2% of frame
+
+    def __init__(self):
+        self.smoothers = [
+            {"x": _SimpleKalman(), "y": _SimpleKalman()},
+            {"x": _SimpleKalman(), "y": _SimpleKalman()},
+        ]
+        self.last_positions: list[dict | None] = [None, None]
+        self.initialized = False
+
+    def update(self, faces: list[dict]) -> list[dict | None]:
+        """Assign detected faces to 2 speaker slots, return smoothed positions.
+
+        Returns list of 2 dicts [speaker0, speaker1] or None if undetected.
+        Each dict has: x, y, w, h (normalized coordinates).
+        """
+        if len(faces) < 2:
+            return list(self.last_positions)
+
+        best = sorted(faces, key=lambda f: f.get("conf", 0), reverse=True)[:2]
+
+        if not self.initialized:
+            best.sort(key=lambda f: f["x"])
+            self.initialized = True
+            for i, face in enumerate(best):
+                sx = self.smoothers[i]["x"].update(face["x"])
+                sy = self.smoothers[i]["y"].update(face["y"])
+                self.last_positions[i] = {
+                    "x": sx, "y": sy, "w": face["w"], "h": face["h"],
+                }
+            return list(self.last_positions)
+
+        # Match faces to speakers by nearest neighbor
+        assignments: list[dict | None] = [None, None]
+        used: set[int] = set()
+
+        for s_idx in range(2):
+            if self.last_positions[s_idx] is None:
+                continue
+            best_dist = float("inf")
+            best_f = -1
+            for f_idx, face in enumerate(best):
+                if f_idx in used:
+                    continue
+                dx = face["x"] - self.last_positions[s_idx]["x"]
+                dy = face["y"] - self.last_positions[s_idx]["y"]
+                dist = (dx * dx + dy * dy) ** 0.5
+                if dist < best_dist:
+                    best_dist = dist
+                    best_f = f_idx
+            if best_f >= 0 and best_dist < 0.3:
+                assignments[s_idx] = best[best_f]
+                used.add(best_f)
+
+        for f_idx, face in enumerate(best):
+            if f_idx in used:
+                continue
+            for s_idx in range(2):
+                if assignments[s_idx] is None:
+                    assignments[s_idx] = face
+                    break
+
+        for i in range(2):
+            if assignments[i] is not None:
+                # Deadzone: skip tiny movements to prevent jitter
+                if self.last_positions[i] is not None:
+                    dx = abs(assignments[i]["x"] - self.last_positions[i]["x"])
+                    dy = abs(assignments[i]["y"] - self.last_positions[i]["y"])
+                    if dx < self.DEADZONE and dy < self.DEADZONE:
+                        continue
+                sx = self.smoothers[i]["x"].update(assignments[i]["x"])
+                sy = self.smoothers[i]["y"].update(assignments[i]["y"])
+                self.last_positions[i] = {
+                    "x": sx, "y": sy,
+                    "w": assignments[i]["w"], "h": assignments[i]["h"],
+                }
+
+        return list(self.last_positions)
+
+    def reset(self):
+        for s in self.smoothers:
+            s["x"].reset()
+            s["y"].reset()
+        self.last_positions = [None, None]
+        self.initialized = False
+
+
+def _detect_faces_dnn(
+    frame: np.ndarray,
+    dnn_net,
+    upscale_large: bool = True,
+) -> list[dict]:
+    """Detect faces using OpenCV DNN (ResNet-10 SSD).
+
+    Returns list of face dicts with normalized x, y, w, h, conf.
+    Upscales 2x for 16:9 sources to catch small gallery faces.
+    """
+    h, w = frame.shape[:2]
+
+    if upscale_large and w >= 1500:
+        detect_frame = cv2.resize(
+            frame, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR,
+        )
+    else:
+        detect_frame = frame
+
+    blob = cv2.dnn.blobFromImage(
+        detect_frame, 1.0, (300, 300), (104.0, 177.0, 123.0),
+    )
+    dnn_net.setInput(blob)
+    detections = dnn_net.forward()
+
+    faces = []
+    for i in range(detections.shape[2]):
+        conf = float(detections[0, 0, i, 2])
+        if conf < 0.3:
+            continue
+        x1 = max(0.0, float(detections[0, 0, i, 3]))
+        y1 = max(0.0, float(detections[0, 0, i, 4]))
+        x2 = min(1.0, float(detections[0, 0, i, 5]))
+        y2 = min(1.0, float(detections[0, 0, i, 6]))
+        fw = x2 - x1
+        fh = y2 - y1
+        if fw > 0.005 and fh > 0.005:
+            faces.append({
+                "x": (x1 + x2) / 2, "y": (y1 + y2) / 2,
+                "w": fw, "h": fh, "conf": conf,
+            })
+
+    return faces
+
+
+def _get_mouth_y(
+    frame: np.ndarray,
+    face: dict,
+    mp_detector,
+    src_w: int,
+    src_h: int,
+    padding_pct: float = 2.0,
+) -> float | None:
+    """Get mouth Y position in source pixels using MediaPipe landmarks 13+14."""
+    if mp_detector is None:
+        return None
+
+    try:
+        import mediapipe as mp_lib
+    except ImportError:
+        return None
+
+    cx = face["x"] * src_w
+    cy = face["y"] * src_h
+    face_w_px = face["w"] * src_w * (1 + padding_pct)
+    face_h_px = face["h"] * src_h * (1 + padding_pct)
+
+    x1 = int(max(0, cx - face_w_px / 2))
+    y1 = int(max(0, cy - face_h_px / 2))
+    x2 = int(min(src_w, x1 + int(face_w_px)))
+    y2 = int(min(src_h, y1 + int(face_h_px)))
+
+    cropped = frame[y1:y2, x1:x2]
+    if cropped.size == 0:
+        return None
+
+    up_scale = max(1.0, 400 / max(cropped.shape[1], 1))
+    upscaled = (
+        cv2.resize(cropped, None, fx=up_scale, fy=up_scale)
+        if up_scale > 1.0
+        else cropped
+    )
+
+    rgb = cv2.cvtColor(upscaled, cv2.COLOR_BGR2RGB)
+    mp_image = mp_lib.Image(image_format=mp_lib.ImageFormat.SRGB, data=rgb)
+
+    try:
+        result = mp_detector.detect(mp_image)
+    except Exception:
+        return None
+
+    if not result.face_landmarks:
+        return None
+
+    lm = result.face_landmarks[0]
+    mouth_y_norm = (lm[13].y + lm[14].y) / 2
+    return y1 + mouth_y_norm * cropped.shape[0]
+
+
+def render_dynamic_podcast(
+    video_path: str,
+    crop_path: CropPath,
+    output_path: str,
+    config: dict,
+    layout_segments: list,
+) -> None:
+    """Render dynamic podcast — switches between split-screen and close-up per segment.
+
+    Split-screen segments: Top half = Speaker A, Bottom half = Speaker B
+        (per-frame DNN face detection, Kalman smoothing, mouth centering).
+    Close-up segments: Standard 9:16 face-tracking crop from keyframes.
+    Transitions: Alpha crossfade between layout modes.
+    """
+    from ..detection.layout_detector import LayoutType
+    from .crop_renderer import _interpolate_crop_x
+
+    split_cfg = config.get("split_screen", {})
+    dynamic_cfg = split_cfg.get("dynamic_layout", {})
+    use_blur_fill = split_cfg.get("background", "black") == "blur"
+    crossfade_frames = dynamic_cfg.get("crossfade_frames", 5)
+
+    # Large padding captures head+shoulders from small gallery faces (~2x zoom)
+    split_face_padding = 18.0
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise RuntimeError(f"Cannot open video: {video_path}")
+
+    fps = crop_path.source_fps
+    total = crop_path.source_total_frames
+    src_w = crop_path.source_width
+    src_h = crop_path.source_height
+
+    # 9:16 crop dimensions for close-up segments
+    crop_w_916 = int(src_h * 9 / 16)
+    crop_h_916 = src_h
+
+    # Load DNN face detector
+    prototxt = str(_MODELS_DIR / "deploy.prototxt")
+    caffemodel = str(_MODELS_DIR / "res10_300x300_ssd_iter_140000.caffemodel")
+    dnn_net = cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
+
+    # MediaPipe for mouth centering
+    mp_detector = None
+    if dynamic_cfg.get("mouth_centering", True) and _FACE_LANDMARKER_MODEL.exists():
+        try:
+            import mediapipe as mp_lib
+            from mediapipe.tasks import python as mp_python
+            from mediapipe.tasks.python import vision as mp_vision
+
+            base_options = mp_python.BaseOptions(
+                model_asset_path=str(_FACE_LANDMARKER_MODEL),
+            )
+            options = mp_vision.FaceLandmarkerOptions(
+                base_options=base_options,
+                running_mode=mp_vision.RunningMode.IMAGE,
+                num_faces=2,
+                min_face_detection_confidence=0.3,
+            )
+            mp_detector = mp_vision.FaceLandmarker.create_from_options(options)
+            print("  Mouth centering: enabled (MediaPipe)")
+        except ImportError:
+            print("  Mouth centering: disabled (MediaPipe not available)")
+
+    tracker = _SpeakerTracker()
+    slot_h = OUT_H // 2  # 960px per speaker
+    slot_w = OUT_W       # 1080px
+    mouth_y_cache: list[float | None] = [None, None]
+    mouth_sample_interval = 10
+
+    def get_segment(fidx: int):
+        for seg in layout_segments:
+            if seg.start_frame <= fidx <= seg.end_frame:
+                return seg
+        return None
+
+    # Print segment summary
+    print(f"  Dynamic layout: {len(layout_segments)} segments")
+    for seg in layout_segments:
+        dur = seg.end_sec - seg.start_sec
+        print(f"    {seg.layout.value}: {seg.start_sec:.1f}s - {seg.end_sec:.1f}s ({dur:.1f}s)")
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+
+    ffmpeg_cmd = _build_ffmpeg_cmd(
+        output_path=output_path,
+        width=OUT_W,
+        height=OUT_H,
+        fps=fps,
+        audio_source=video_path,
+        config=config.get("output", {}),
+    )
+
+    stderr_file = tempfile.NamedTemporaryFile(mode="w", suffix=".log", delete=False)
+    proc = subprocess.Popen(
+        ffmpeg_cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=stderr_file,
+    )
+
+    prev_layout_type = None
+    prev_rendered = None
+    transition_base = None
+    transition_left = 0
+
+    try:
+        frame_idx = 0
+        while frame_idx < total:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            segment = get_segment(frame_idx)
+            current_type = segment.layout if segment else None
+
+            # Detect layout transition → start crossfade + reset tracker
+            if (current_type is not None and prev_layout_type is not None
+                    and current_type != prev_layout_type):
+                if prev_rendered is not None:
+                    transition_base = prev_rendered.copy()
+                transition_left = crossfade_frames
+                tracker.reset()
+                mouth_y_cache = [None, None]
+
+            # --- Render based on current layout type ---
+            if current_type is not None and current_type.value == "split_screen":
+                output_frame = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
+
+                faces = _detect_faces_dnn(frame, dnn_net, upscale_large=True)
+                positions = tracker.update(faces)
+
+                # Sample mouth positions periodically
+                frames_in_seg = frame_idx - (segment.start_frame if segment else 0)
+                if frames_in_seg % mouth_sample_interval == 0:
+                    for s_idx in range(2):
+                        if positions[s_idx] is not None:
+                            my = _get_mouth_y(
+                                frame, positions[s_idx], mp_detector,
+                                src_w, src_h, padding_pct=3.0,
+                            )
+                            if my is not None:
+                                mouth_y_cache[s_idx] = my
+
+                # Smart per-speaker crop: don't overlap into other speaker's area
+                for s_idx in range(2):
+                    pos = positions[s_idx]
+                    if pos is None:
+                        continue
+
+                    face_x_px = pos["x"] * src_w
+                    face_y_px = pos["y"] * src_h
+
+                    # Default crop width: ~540px (2x zoom to 1080 slot)
+                    target_crop_w = slot_w // 2
+
+                    # Limit crop to not cross midpoint between speakers
+                    other = positions[1 - s_idx]
+                    if other is not None:
+                        other_x_px = other["x"] * src_w
+                        mid_px = (face_x_px + other_x_px) / 2
+                        max_half_w = abs(face_x_px - mid_px)
+                        target_crop_w = min(target_crop_w, int(max_half_w * 1.8))
+
+                    target_crop_w = max(target_crop_w, 300)
+
+                    # Crop height: match slot aspect ratio (960/1080)
+                    target_crop_h = int(target_crop_w * slot_h / slot_w)
+                    target_crop_h = min(target_crop_h, src_h)
+
+                    # Center vertically on mouth if available, else face
+                    anchor_y = mouth_y_cache[s_idx] if mouth_y_cache[s_idx] is not None else face_y_px
+                    crop_x1 = int(face_x_px - target_crop_w / 2)
+                    crop_y1 = int(anchor_y - target_crop_h * 0.4)  # Face at 40% height
+
+                    # Clamp to frame bounds
+                    crop_x1 = max(0, min(crop_x1, src_w - target_crop_w))
+                    crop_y1 = max(0, min(crop_y1, src_h - target_crop_h))
+
+                    cropped = frame[crop_y1:crop_y1 + target_crop_h,
+                                    crop_x1:crop_x1 + target_crop_w]
+
+                    if cropped.size == 0:
+                        continue
+
+                    result = cv2.resize(
+                        cropped, (slot_w, slot_h),
+                        interpolation=cv2.INTER_LANCZOS4,
+                    )
+
+                    # Bilateral filter for heavy zoom (>3x)
+                    if slot_w / max(target_crop_w, 1) > 3.0:
+                        result = cv2.bilateralFilter(
+                            result, d=7, sigmaColor=40, sigmaSpace=40,
+                        )
+
+                    y_off = s_idx * slot_h
+                    output_frame[y_off:y_off + slot_h, :slot_w] = result
+
+            else:
+                # CLOSE-UP: standard 9:16 face-tracking crop
+                crop_x = _interpolate_crop_x(crop_path, frame_idx)
+                crop_x = max(0, min(crop_x, src_w - crop_w_916))
+                cropped = frame[0:crop_h_916, crop_x:crop_x + crop_w_916]
+                output_frame = cv2.resize(
+                    cropped, (OUT_W, OUT_H), interpolation=cv2.INTER_LANCZOS4,
+                )
+
+            # Apply crossfade during transitions
+            if transition_left > 0 and transition_base is not None:
+                alpha = (crossfade_frames - transition_left + 1) / (crossfade_frames + 1)
+                output_frame = cv2.addWeighted(
+                    transition_base, 1.0 - alpha, output_frame, alpha, 0,
+                )
+                transition_left -= 1
+
+            prev_rendered = output_frame
+            prev_layout_type = current_type
+
+            proc.stdin.write(output_frame.tobytes())
+            frame_idx += 1
+
+            if frame_idx % max(1, total // 20) == 0:
+                pct = int(frame_idx / total * 100)
+                print(f"  Rendering dynamic podcast: {pct}% "
+                      f"({frame_idx}/{total} frames)", flush=True)
+
+    finally:
+        cap.release()
+        if mp_detector:
+            mp_detector.close()
+        if proc.stdin:
+            proc.stdin.close()
+        proc.wait()
+        stderr_file.close()
+
+        if proc.returncode != 0:
+            with open(stderr_file.name, "r") as f:
+                stderr_content = f.read()
+            os.unlink(stderr_file.name)
+            raise RuntimeError(
+                f"FFmpeg failed (code {proc.returncode}): {stderr_content[-500:]}"
+            )
+
+        os.unlink(stderr_file.name)
+
+    print(f"  Render complete (dynamic podcast): {output_path}")

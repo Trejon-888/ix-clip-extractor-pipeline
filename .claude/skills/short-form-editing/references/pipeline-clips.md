@@ -581,3 +581,65 @@ Always take a screenshot of the video to determine layout before setting positio
 - Categories: brand names, numbers/stats, action verbs, key concepts
 - Render emphasized words in brand orange (#FF7614) with glow shadow
 - Non-emphasized words render white (#FFFFFF)
+
+---
+
+## Podcast/Interview Clip Editing Patterns
+
+Podcast clips reframed with `--format split` have **dynamic layouts** that switch between split-screen (two speakers) and close-up (single speaker). Captions and overlays must adapt.
+
+### Layout-Aware Caption Positioning
+
+Define layout segments in the composition, then dynamically position captions:
+
+| Layout Segment | Caption `top` | Font Size | Rationale |
+|---------------|--------------|-----------|-----------|
+| `split_screen` | `46%` (middle between speaker halves) | 56px | Between top/bottom speakers, tight space |
+| `close_up` | `62%` (lower third) | 72px | Standard lower-third, more vertical room |
+
+```typescript
+const LAYOUT_SEGMENTS: Array<{
+  type: "split_screen" | "close_up";
+  startFrame: number;
+  endFrame: number;
+}> = [
+  { type: "split_screen", startFrame: 0, endFrame: 405 },
+  { type: "close_up", startFrame: 408, endFrame: 1626 },
+  // ... segments from crop_path.json layout_segments
+];
+
+function getLayoutType(frame: number): "split_screen" | "close_up" {
+  for (const seg of LAYOUT_SEGMENTS) {
+    if (frame >= seg.startFrame && frame <= seg.endFrame) return seg.type;
+  }
+  return "close_up";
+}
+
+// Smooth 5-frame crossfade at layout transition boundaries
+function getCaptionTopPct(frame: number): number {
+  const layout = getLayoutType(frame);
+  const target = layout === "split_screen" ? 46 : 62;
+  // ... interpolation at boundaries (see PodcastStressExpert.tsx)
+  return target;
+}
+```
+
+### Video Synchronization Rules (Critical)
+
+1. **ALWAYS transcribe from the REFRAMED video** — not the source
+2. **Use WhisperX** for word-level timestamps, convert: `frame = round(seconds * 30)`
+3. **Set `durationInFrames`** to match actual video: `round(audio_duration_sec * 30)`
+4. **Verify with ffprobe:** `ffprobe -v quiet -print_format json -show_streams VIDEO`
+5. Video may be 29.97fps but composition runs at 30fps — Remotion handles the mapping
+
+### Where Layout Segments Come From
+
+The `crop_path.json` generated during reframe contains a `layout_segments` array. Copy these frame ranges into the composition's `LAYOUT_SEGMENTS` constant.
+
+### Reference Composition
+
+**`PodcastStressExpert.tsx`** — Gold standard for podcast clip editing:
+- 6 layout segments alternating split_screen / close_up
+- Dynamic caption positioning with smooth 5-frame transitions
+- 9 ConceptOverlay pop-outs + 1 CTA
+- Font size adapts: 56px (split) vs 72px (close-up)

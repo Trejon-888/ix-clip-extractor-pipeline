@@ -16,6 +16,17 @@ Automated clip extraction + face-tracking reframe + Remotion video editing pipel
 4. **Editing** — `/edit` routes to `video-editing` (router) → `short-form-editing` or `long-form-editing`
 5. **Publishing** — `/short-form-posting` or `/youtube-content-package`
 
+### Podcast/Interview Pipeline
+
+```
+source video → /clip-extractor --format split → dynamic layout detection
+→ split-screen + close-up segments → /transcribe (reframed video) → /edit
+```
+
+- `--format split` auto-detects layout switches (gallery ↔ close-up)
+- Layout-aware captions: middle (46%) for split-screen, lower third (62%) for close-up
+- `crop_path.json` contains `layout_segments` array — copy into Remotion composition
+
 ## Skills
 
 13 skills in `.claude/skills/`:
@@ -46,6 +57,7 @@ npm run render -- <Id> out/x.mp4  # Render composition
 # Clip Extractor
 cd tools
 python -m clip_extractor reframe --video input.mp4 --output clips/ --format 9x16
+python -m clip_extractor reframe --video podcast.mp4 --output clips/ --format split  # podcast/interview
 python -m clip_extractor batch --video source.mp4 --clips defs.json --output clips/
 python -m clip_extractor analyze --video clip.mp4
 ```
@@ -64,6 +76,7 @@ python -m clip_extractor analyze --video clip.mp4
 | <90s (pipeline) | Short-form | ConceptOverlay | 8-15 |
 | <90s (standalone) | Short-form | AppleStylePopup + FloatingCard | 5-7 |
 | <90s (announcement) | Short-form | AppleStylePopup | 10-18 |
+| <120s (podcast) | Short-form | ConceptOverlay + layout-aware captions | 8-12 |
 | 5+ min | Long-form | ConceptOverlay | 30-40+ |
 
 ### Gold Standards
@@ -74,6 +87,7 @@ Study these compositions for patterns:
 - `Clip2StopManuallyPosting.tsx` — Pipeline clip with individual platform pops
 - `Clip6VoiceControlDemoV3.tsx` — Standalone demo (tier system, PhraseCaption)
 - `ClaudeOpus46Announcement.tsx` — Announcement (AppleStylePopup, word-by-word captions)
+- `PodcastStressExpert.tsx` — Podcast clip (layout-aware captions, 6 layout segments, 9 pop-outs)
 - `CraftingOutreachCampaign.tsx` — Long-form (28 min, 35+ overlays)
 
 ## Critical Rules
