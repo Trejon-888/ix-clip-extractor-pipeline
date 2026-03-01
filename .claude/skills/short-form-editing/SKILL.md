@@ -38,16 +38,18 @@ Identify the sub-type FIRST. Every decision flows from this.
 
 ---
 
-## 7-Phase Editing Process
+## 8-Phase Editing Process
 
 ### Phase 0: LOAD CONTEXT
 
 1. Read this SKILL.md
 2. Read `.claude/skills/video-editing/SKILL.md` for shared component library and rules
 3. Read `remotion/lib/config.ts` for FPS (30)
-4. Read `remotion/lib/colors.ts` for brand palette
+4. Read `remotion/lib/colors.ts` for brand palette (or style palette if style selected)
 5. Identify sub-type from user context (pipeline / standalone / announcement)
 6. Study the correct gold standard composition for the sub-type
+7. **If style selected:** read `remotion/playbook/styles/{slug}.md` for color palette, component preferences, animation springs
+8. **Load catalogs:** read `remotion/playbook/animations/_index.md`, `remotion/playbook/components/_index.md`
 
 ### Phase 1: Transcript Analysis
 
@@ -67,6 +69,28 @@ Identify the sub-type FIRST. Every decision flows from this.
 // Find "voice" at 27.073s in SRT
 // frame = Math.round(27.073 * 30) = 812
 ```
+
+### Phase 1.5: Scene Planning
+
+**Before building anything**, create a structured Scene Plan. Read `remotion/playbook/scene-planning.md` for the full methodology.
+
+1. Read the selected style's Component Preferences table
+2. Read `remotion/playbook/components/_index.md` — use Decision Tree to match moments to components
+3. Read `remotion/playbook/animations/_index.md` — use Style-Animation Mapping for entrance selection
+
+For each edit point identified in Phase 1:
+  a. Assign narrative role (hook / concept / proof / emotional / cta / breathing)
+  b. Score impact (A / B / C) using Impact Score system
+  c. Select component using decision tree + style compatibility (only PRIMARY/HIGH)
+  d. Select entrance animation from catalog matching style energy
+  e. Write unique illustration concept (visual metaphor, not literal)
+  f. Assign SFX (J-cut timing, variety)
+
+**Output:** Scene Plan comment block at top of composition file. Validate before proceeding:
+- Pop-out count within sub-type target
+- Spacing ≥ 210 frames between pop-out centers
+- Weight mix: 60-70% light/medium, 30-40% heavy
+- All components style-compatible (PRIMARY or HIGH)
 
 ### Phase 2: Asset Inventory
 

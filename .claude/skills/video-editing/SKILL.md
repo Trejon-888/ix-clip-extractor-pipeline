@@ -22,15 +22,28 @@ Detect the video format, route to the correct editing skill, and provide shared 
 | **90s – 5 min** | Medium | Read `.claude/skills/short-form-editing/SKILL.md` (use higher pop-out density) |
 | **5+ minutes** | Long-form | Read `.claude/skills/long-form-editing/SKILL.md` |
 
-### Step 2: Load the Sub-Skill
+### Step 2: Style Selection
+
+1. Check if user specified a style (e.g., "edit in stippled editorial style", "use high-contrast style")
+2. If not specified, read `remotion/playbook/styles/_index.md` and ask user to pick
+3. If user says "default" or nothing specific, use existing INFINITX orange (`remotion/lib/colors.ts`)
+4. Load selected style file from `remotion/playbook/styles/{slug}.md`
+5. Pass style context to sub-skill: style ID, color palette, component preferences, animation energy
+
+### Step 3: Load the Sub-Skill
 
 Read the FULL SKILL.md for the detected format. Follow its phased process exactly.
 
 **RULE:** Do NOT edit a video without first loading the correct sub-skill. The sub-skill contains the full process, duration tiers, component choices, and density rules.
 
-### Step 3: Load Shared Knowledge
+### Step 4: Load Shared Knowledge
 
 Both sub-skills reference the shared knowledge below. Read this section for component library, brand assets, and rules.
+
+**Also load these catalogs** (used during scene planning and pop-out selection):
+- `remotion/playbook/animations/_index.md` — animation catalog with semantic cards
+- `remotion/playbook/components/_index.md` — component decision tree + semantic cards
+- `remotion/playbook/scene-planning.md` — structured scene plan methodology
 
 ---
 

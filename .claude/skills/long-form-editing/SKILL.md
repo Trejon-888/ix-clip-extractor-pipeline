@@ -87,8 +87,10 @@ Read these files before any editing work:
 1. This SKILL.md
 2. `.claude/skills/video-editing/SKILL.md` — shared component library + rules
 3. `remotion/lib/config.ts` — FPS (30) and resolution presets
-4. `remotion/lib/colors.ts` — brand palette
+4. `remotion/lib/colors.ts` — brand palette (or style palette if style selected)
 5. `remotion/compositions/CraftingOutreachCampaign.tsx` — gold standard
+6. **If style selected:** read `remotion/playbook/styles/{slug}.md` for color palette, component preferences, animation springs
+7. **Load catalogs:** read `remotion/playbook/animations/_index.md`, `remotion/playbook/components/_index.md`
 
 Study the gold standard composition structure: how pop-outs are organized into section arrays, how SFX maps by type, how the layer stack is ordered.
 
@@ -123,6 +125,26 @@ Map the narrative arc:
 | CTA | 85-100% | Subscribe, connect, free offers |
 
 **RULE:** Verify pop-out context. "Anthropic...that's wrong" means pop-out on "Anthropic", NOT "wrong". Grep surrounding words to confirm the concept being visualized.
+
+---
+
+### Phase 1.5: Scene Planning
+
+**Before building anything**, create a structured Scene Plan. Read `remotion/playbook/scene-planning.md` for the full methodology.
+
+1. Read the selected style's Component Preferences table (if style selected)
+2. Read `remotion/playbook/components/_index.md` — use Decision Tree to match moments to components
+3. Read `remotion/playbook/animations/_index.md` — use Style-Animation Mapping for entrance selection
+
+For each of the 30-40+ edit points identified in Phase 1:
+  a. Assign narrative role (hook / concept / proof / emotional / cta / breathing)
+  b. Score impact (A / B / C) — long-form: most concepts are A-tier
+  c. Select component using decision tree + style compatibility
+  d. Select entrance animation from catalog (vary entrances across sections)
+  e. Write unique illustration concept per pop-out
+  f. Assign SFX (vary types per section, never repeat consecutively)
+
+**Output:** Scene Plan comment block at top of composition file. For long-form, organize by section (Intro / Midroll / End).
 
 ---
 

@@ -95,6 +95,19 @@ All illustrations are **inline SVG React components**. No external images, no em
 
 When a new concept needs illustration, create a new inline SVG following the same style.
 
+### Component Preferences
+
+| Component | Compat | Config Override |
+|-----------|--------|----------------|
+| ConceptOverlay (solid-white) | PRIMARY | bg matches C.bg (#FAFAF8), accent: C.accent |
+| ConceptOverlay (frosted) | HIGH | — |
+| ConceptOverlay (dark-blur) | LOW | clashes with light warm aesthetic |
+| AppleStylePopup | HIGH | accentColor: C.accent (#7BFF00) |
+| FloatingKeyword | HIGH | text: C.ink (#1A1A1A), accent: C.accentDark (#5CC800) |
+| FloatingCard | HIGH | bg: C.white, border: C.stroke (#E0E0E0) |
+| KineticText | MEDIUM | needs dark text on light bg |
+| PlatformCascade | HIGH | dark stroke logos on off-white bg |
+
 ---
 
 ## Animation Springs

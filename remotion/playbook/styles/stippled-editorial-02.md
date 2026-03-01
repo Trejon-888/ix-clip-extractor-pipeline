@@ -237,3 +237,18 @@ Each scene should have 2-3 decorative elements to avoid flat backgrounds.
 
 - **Pulsing glow**: `const glow = 0.3 + Math.sin(frame / 8) * 0.15` on CTA `boxShadow` opacity
 - **Floating motion**: `Math.sin(frame / N) * amplitude` (N=12-20, amplitude=4-8px) on illustrations
+
+---
+
+## Component Preferences
+
+| Component | Compat | Config Override |
+|-----------|--------|----------------|
+| ConceptOverlay (dark-blur) | PRIMARY | bg: C.bg (#0A0F2E), accent: C.accent (#2B4FFF) |
+| ConceptOverlay (solid-white) | LOW | white bg clashes with dark aesthetic |
+| ConceptOverlay (frosted) | MEDIUM | use dark frosted: rgba(10,15,46,0.82) + blur(40px) |
+| AppleStylePopup | LOW | white bg clashes with dark style |
+| FloatingKeyword | HIGH | white text (#FFFFFF) on dark video, accent: C.accent |
+| FloatingCard | MEDIUM | use dark glass: rgba(255,255,255,0.06), border: C.stroke |
+| KineticText | HIGH | bold white text pops on dark backgrounds |
+| PlatformCascade | HIGH | white stroke logos on dark bg |
