@@ -22,7 +22,9 @@ B-TIER SUPPORTING (speaker stays visible, punctuation not paragraph)?
   ├─ Brand reveal with logo → FloatingKeyword (icon prop = medium)
   ├─ Crystal box visual → FloatingKeyword (customVisual = medium)
   ├─ Card with icon + label → FloatingCard
-  └─ Product showcase / image reveal → PillShowcase (SuperDesign)
+  ├─ Product showcase / image reveal → PillShowcase (SuperDesign)
+  ├─ Portfolio / gallery grid reveal → MasonryGallery (SuperDesign)
+  └─ Feature/testimonial card cycling → CardSwapShowcase (SuperDesign)
 
 STRUCTURAL (captions, badges, transitions)?
   ├─ Word-by-word captions (pipeline) → CleanWordCaption
@@ -195,6 +197,47 @@ INTEGRATES AS: ConceptOverlay with custom illustration containing:
 ENTRANCE: clip-path-inset or spring-scale
 SOURCE: SuperDesign High-Contrast Editorial
 ---
+
+---
+NAME: MasonryGallery
+DOES: Responsive masonry grid layout with GSAP-powered directional entrance animations (bottom/top/left/right/center/random). Blur-to-focus cinematic reveal, staggered item entry, hover scale interactions. Automatic column calculation based on container width.
+GOOD FOR: Portfolio showcases, image gallery reveals, multi-project displays, visual proof grids, before/after collections, screenshot galleries, client work showcases
+ENERGY: medium-high
+STYLE COMPAT: minimalist-beta-capture (primary — blur-to-focus on obsidian), high-contrast-editorial (high), stippled-editorial (high), lumina-neo-brutalist (medium — needs 2px borders)
+INTEGRATES AS: ConceptOverlay with custom illustration containing:
+  - Masonry grid using absolute positioning (calculated column heights)
+  - Column count: 2-3 columns in portrait 1080px (responsive breakpoints)
+  - Gap: 24px between items
+  - Each item: rounded-xl container with background-image
+  - Entrance: items animate from specified direction to final position
+  - Blur-to-focus: filter blur(20px)→blur(0px) over ~36 frames (1.2s)
+  - Stagger: 0.05-0.1s delay between consecutive items
+  - Spring config: power3.out equivalent (damping: 14, stiffness: 80)
+  - Title overlay: gradient from-black/60 at bottom with white text
+ENTRANCE: directional-spring (configurable from any edge) + blur-to-focus
+SOURCE: SuperDesign MasonryGallery
+---
+
+---
+NAME: CardSwapShowcase
+DOES: Automated perspective card cycling with depth perception. Cards stack with horizontal/vertical offset and z-depth. Front card drops away, remaining cards shift forward with elastic spring, dropped card re-enters at back. Skew transform for 3D feel.
+GOOD FOR: Feature showcases, testimonial rotations, product comparisons, service highlights, portfolio item cycling, before/after sequences
+ENERGY: medium-high
+STYLE COMPAT: lumina-neo-brutalist (high — hard shadow cards), minimalist-beta-capture (high — glass panel cards), high-contrast-editorial (medium), freehand-illustrated (medium)
+INTEGRATES AS: ConceptOverlay with custom illustration containing:
+  - N cards (3-5) stacked with offset: x += cardDistance, y -= verticalDistance per slot
+  - z-depth: z -= cardDistance * 1.5 per slot (perspective effect)
+  - Skew: skewY(4-6deg) on all cards
+  - Swap cycle every ~120 frames (4s):
+    Phase 1: front card drops (translateY += 500, ~36 frames)
+    Phase 2: remaining cards spring to new slots (overlapping start)
+    Phase 3: dropped card returns to back position
+  - Spring: elastic.out(0.6, 0.9) for playful, power1.inOut for premium
+  - Card content: image with gradient overlay + text at bottom
+  - Easing variants: elastic (bouncy, energetic) or linear (smooth, premium)
+ENTRANCE: cards appear with initial skew + stagger-reveal
+SOURCE: SuperDesign CardSwapShowcase
+---
 ```
 
 ---
@@ -203,15 +246,17 @@ SOURCE: SuperDesign High-Contrast Editorial
 
 Quick reference: which components work with which styles.
 
-| Component | Default (Orange) | Freehand | Stippled Editorial | High-Contrast Editorial |
-|-----------|-----------------|----------|-------------------|------------------------|
-| ConceptOverlay (solid-white) | PRIMARY | HIGH | LOW | LOW |
-| ConceptOverlay (frosted) | MEDIUM | HIGH | MEDIUM | MEDIUM |
-| ConceptOverlay (dark-blur) | MEDIUM | LOW | PRIMARY | PRIMARY |
-| AppleStylePopup | PRIMARY | HIGH | LOW | LOW |
-| FloatingKeyword | HIGH | HIGH | HIGH | HIGH |
-| FloatingCard | HIGH | HIGH | MEDIUM | MEDIUM |
-| KineticText | MEDIUM | LOW | HIGH | HIGH |
-| PlatformCascade | HIGH | HIGH | HIGH | HIGH |
-| StepReveal | HIGH | HIGH | HIGH | HIGH |
-| PillShowcase | MEDIUM | LOW | HIGH | PRIMARY |
+| Component | Default (Orange) | Freehand | Stippled Editorial | High-Contrast Editorial | Minimalist Beta Capture | Lumina Neo-Brutalist | Kinetic Orange |
+|-----------|-----------------|----------|-------------------|------------------------|------------------------|---------------------|---------------|
+| ConceptOverlay (solid-white) | PRIMARY | HIGH | LOW | LOW | LOW | PRIMARY | LOW |
+| ConceptOverlay (frosted) | MEDIUM | HIGH | MEDIUM | MEDIUM | HIGH | LOW | LOW |
+| ConceptOverlay (dark-blur) | MEDIUM | LOW | PRIMARY | PRIMARY | PRIMARY | MEDIUM | PRIMARY |
+| AppleStylePopup | PRIMARY | HIGH | LOW | LOW | LOW | MEDIUM | LOW |
+| FloatingKeyword | HIGH | HIGH | HIGH | HIGH | HIGH | HIGH | HIGH |
+| FloatingCard | HIGH | HIGH | MEDIUM | MEDIUM | MEDIUM | HIGH | LOW |
+| KineticText | MEDIUM | LOW | HIGH | HIGH | MEDIUM | HIGH | PRIMARY |
+| PlatformCascade | HIGH | HIGH | HIGH | HIGH | HIGH | HIGH | HIGH |
+| StepReveal | HIGH | HIGH | HIGH | HIGH | HIGH | HIGH | MEDIUM |
+| PillShowcase | MEDIUM | LOW | HIGH | PRIMARY | HIGH | LOW | LOW |
+| MasonryGallery | MEDIUM | MEDIUM | HIGH | HIGH | PRIMARY | MEDIUM | LOW |
+| CardSwapShowcase | MEDIUM | MEDIUM | MEDIUM | MEDIUM | HIGH | HIGH | MEDIUM |

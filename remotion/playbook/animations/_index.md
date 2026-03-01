@@ -181,6 +181,87 @@ REMOTION CODE:
   const layerOpacity = (delay: number) =>
     spring({ frame: Math.max(0, frame - delay), fps: 30, config: { damping: 20, stiffness: 200 } });
 ---
+
+---
+NAME: slide-up-cubic
+DOES: Smooth upward slide with deceleration, element rises from 60px below with opacity fade. Equivalent to cubic-bezier(0.16, 1, 0.3, 1) at 0.8s
+GOOD FOR: Premium dark-theme reveals, glass panel entrances, editorial text introductions, obsidian-style hero moments
+ENERGY: low-medium
+STYLE COMPAT: minimalist-beta-capture (preferred), high-contrast-editorial
+SOURCE: SuperDesign Minimalist Beta Capture
+REMOTION CODE:
+  const slideUp = spring({ frame, fps: 30, config: { damping: 25, stiffness: 100 } });
+  const y = interpolate(slideUp, [0, 1], [60, 0]);
+  const opacity = interpolate(frame, [0, 12], [0, 1], { extrapolateRight: "clamp" });
+  // Apply: transform: `translateY(${y}px)`, opacity
+  // Duration: ~24 frames (0.8s at 30fps)
+---
+
+---
+NAME: push-press
+DOES: Element translates diagonally toward its shadow to simulate physical button press, shadow shrinks simultaneously. Snappy cubic-bezier bounce
+GOOD FOR: CTA button reveals, interactive element emphasis, neo-brutalist button animations, purchase moments
+ENERGY: high
+STYLE COMPAT: lumina-neo-brutalist (preferred), kinetic-orange
+SOURCE: SuperDesign Lumina Neo-Brutalist
+REMOTION CODE:
+  // Rest state: boxShadow 8px 8px 0px 0px #000, transform: translate(0, 0)
+  // Pressed state: boxShadow 0px 0px 0px 0px #000, transform: translate(8px, 8px)
+  const press = spring({ frame, fps: 30, config: { damping: 14, stiffness: 180 } });
+  const shift = interpolate(press, [0, 0.5, 1], [0, 8, 0]); // Press then release
+  const shadow = interpolate(press, [0, 0.5, 1], [8, 0, 8]);
+  // Apply: transform: `translate(${shift}px, ${shift}px)`, boxShadow: `${shadow}px ${shadow}px 0px 0px #000`
+---
+
+---
+NAME: infinite-marquee
+DOES: Continuous horizontal text scroll at constant linear speed, seamless loop with repeated text. No spring physics — pure linear motion
+GOOD FOR: Social proof bars, brand name scrolls, section dividers, hype text, service marquees
+ENERGY: medium
+STYLE COMPAT: kinetic-orange (preferred), lumina-neo-brutalist
+SOURCE: SuperDesign Kinetic Orange
+REMOTION CODE:
+  // Linear continuous scroll — NOT spring-based
+  const speed = 2; // pixels per frame
+  const offset = (frame * speed) % totalTextWidth;
+  // Apply: transform: `translateX(-${offset}px)`
+  // Text must repeat 3-4x for seamless loop
+  // Wrap in overflow:hidden container
+  // Reverse direction: use positive offset for Row 2
+---
+
+---
+NAME: skew-section
+DOES: Full-width container with -2deg skew transform, creates dynamic angular energy between vertical sections
+GOOD FOR: Section dividers, marquee containers, full-width accent bars, editorial transitions
+ENERGY: medium
+STYLE COMPAT: kinetic-orange (preferred), lumina-neo-brutalist
+SOURCE: SuperDesign Kinetic Orange
+REMOTION CODE:
+  // Static transform — applied to container, not animated per-frame
+  const skewStyle = {
+    transform: "skewY(-2deg)",
+    transformOrigin: "center",
+  };
+  // Content inside should counter-skew if text needs to be straight:
+  // transform: "skewY(2deg)"
+---
+
+---
+NAME: spin-indicator
+DOES: Continuous clockwise rotation of circular SVG text element, 360 degrees over 12 seconds. Arrow icon stays centered and static
+GOOD FOR: Scroll indicators, decorative hero elements, loading states, ambient circular motion
+ENERGY: low
+STYLE COMPAT: kinetic-orange (preferred), high-contrast-editorial
+SOURCE: SuperDesign Kinetic Orange
+REMOTION CODE:
+  // Continuous rotation: 30 degrees per second at 30fps = 1 degree per frame
+  const rotation = frame; // 1 degree per frame
+  // Apply to SVG container: transform: `rotate(${rotation}deg)`
+  // SVG: 144px circle, textPath with "Scroll Down • " repeated 3-4x
+  // Font: Space Mono 9px bold uppercase
+  // Center: static arrow-down icon (Lucide)
+---
 ```
 
 ---
@@ -274,6 +355,46 @@ REMOTION CODE:
   const opacity = spring({ frame: Math.max(0, frame - delay), fps: 30, config: { damping: 20, stiffness: 200 } });
   // stepDelay: 3-5 frames for fast, 8-12 for dramatic
 ---
+
+---
+NAME: squares-grid-bg
+DOES: Animated canvas grid of moving squares with directional flow (diagonal/up/right/down/left). Continuous subtle background motion with hover-reactive cells
+GOOD FOR: Dark ambient backgrounds, technical/matrix themes, behind hero text on dark sections, loading screens, obsidian-style depth
+ENERGY: low
+STYLE COMPAT: minimalist-beta-capture (preferred), kinetic-orange, stippled-editorial
+SOURCE: SuperDesign SquaresBackground
+REMOTION CODE:
+  // Canvas-based — implement as AbsoluteFill background layer
+  // Grid: squareSize (40px default), borderColor (#333 for dark themes)
+  // Direction: offset grid position per frame
+  // Diagonal: gridOffset.x -= speed; gridOffset.y -= speed; (each frame)
+  // Right: gridOffset.x -= speed; (each frame)
+  // Redraw grid each frame with ctx.strokeRect
+  // Add radial gradient vignette: center transparent → edge rgba(6,0,16,0.8)
+  // Speed: 0.5-1.0 for subtle, 2.0+ for energetic
+  // No spring — pure linear motion per frame
+---
+
+---
+NAME: card-swap-cycle
+DOES: Automated perspective card cycling using GSAP-style spring. Front card drops down, remaining cards shift forward, front card re-enters at back position. Skew + depth via z-translation
+GOOD FOR: Feature showcases, testimonial rotations, portfolio item cycling, before/after reveals, product card sequences
+ENERGY: medium-high
+STYLE COMPAT: lumina-neo-brutalist (preferred), minimalist-beta-capture, high-contrast-editorial
+SOURCE: SuperDesign CardSwapShowcase
+REMOTION CODE:
+  // Card stack: N cards at staggered positions
+  // Slot calculation per card at index i:
+  //   x: i * cardDistance, y: -i * verticalDistance, z: -i * cardDistance * 1.5
+  //   zIndex: total - i (front card = highest)
+  // Swap animation (every ~120 frames / 4 seconds):
+  //   Phase 1 (DROPS): front card translateY += 500, duration ~36 frames
+  //   Phase 2 (PROMOTE): remaining cards spring to new positions (damping 14, stiffness 120)
+  //   Phase 3 (RETURN): dropped card moves to back slot from below
+  // Skew: skewY(4-6deg) on all cards for depth perspective
+  // Use Sequence blocks: each swap cycle = ~120 frames
+  const swapSpring = spring({ frame, fps: 30, config: { damping: 14, stiffness: 120 } });
+---
 ```
 
 ---
@@ -288,3 +409,6 @@ Quick lookup: which animations pair best with which styles.
 | Freehand Illustrated | fade-blur, wipe-right | useSmooth, useSnappy | float (gentle, N=16) | pop-scale (too aggressive) |
 | Stippled Editorial | clip-circle, pop-scale | useSnappy, useBouncy | pulse-glow | fade-blur (too soft) |
 | High-Contrast Editorial | clip-path-inset, echo-stack-reveal | useSnappy | stagger-reveal | fade-blur (too soft) |
+| Minimalist Beta Capture | slide-up-cubic, fade-blur | useSmooth | squares-grid-bg, float | pop-scale (too aggressive), push-press (too playful) |
+| Lumina Neo-Brutalist | push-press, slide-in-edge | useSnappy, useBouncy | card-swap-cycle | fade-blur (too soft), echo-stack (wrong aesthetic) |
+| Kinetic Orange | infinite-marquee, pop-scale, skew-section | useSnappy, useBouncy | spin-indicator, infinite-marquee | fade-blur (too soft), slide-up-cubic (too gentle) |

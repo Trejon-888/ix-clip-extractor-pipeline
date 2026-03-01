@@ -11,6 +11,9 @@ Searchable index of all visual styles. During editing, the AI reads this to matc
 | freehand-illustrated | Freehand Illustrated | medium | warm | tutorials, how-tos, friendly demos | `freehand-illustrated-01.md` |
 | stippled-editorial | Stippled Editorial | high | authoritative | announcements, thought-leadership, bold reveals | `stippled-editorial-02.md` |
 | high-contrast-editorial | High-Contrast Editorial | high | authoritative-minimal | product launches, brand statements, premium reveals | `high-contrast-editorial-03.md` |
+| minimalist-beta-capture | Minimalist Beta Capture | low-medium | premium, elite | beta launches, exclusive reveals, technical products | `minimalist-beta-capture-04.md` |
+| lumina-neo-brutalist | Lumina Neo-Brutalist | high | confident, playful | SaaS launches, feature reveals, product marketing | `lumina-neo-brutalist-05.md` |
+| kinetic-orange | Kinetic Orange | very-high | urgent, technical | agency reels, service showcases, high-energy promos | `kinetic-orange-07.md` |
 
 ---
 
@@ -21,6 +24,9 @@ Searchable index of all visual styles. During editing, the AI reads this to matc
 | "clean", "minimal", "friendly", "warm" | freehand-illustrated |
 | "bold", "dark", "editorial", "textured" | stippled-editorial |
 | "swiss", "high-contrast", "luxury", "brutalist" | high-contrast-editorial |
+| "obsidian", "dark premium", "elite", "technical dark" | minimalist-beta-capture |
+| "neo-brutalist", "yellow", "playful bold", "SaaS" | lumina-neo-brutalist |
+| "kinetic", "aggressive", "orange brutalist", "high-energy" | kinetic-orange |
 | nothing / "default" / "orange" | Default INFINITX orange (`remotion/lib/colors.ts`) |
 
 ---
