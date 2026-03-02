@@ -17,6 +17,15 @@ import { ClipAIGeneratedThumbnail } from "./compositions/ClipAIGeneratedThumbnai
 import { ClipNextVideosAgenticPipeline } from "./compositions/ClipNextVideosAgenticPipeline";
 import { ClipAIHandlesAllContent } from "./compositions/ClipAIHandlesAllContent";
 import { PodcastStressExpert } from "./compositions/PodcastStressExpert";
+import { PodcastStressExpertV2 } from "./compositions/PodcastStressExpertV2";
+import { ToolCalling2Point0 } from "./compositions/ToolCalling2Point0";
+import { Clip1CloudCreativesHook } from "./compositions/Clip1CloudCreativesHook";
+import { Clip2OneProblemAiManager } from "./compositions/Clip2OneProblemAiManager";
+import { Clip3SkillsCustomizable } from "./compositions/Clip3SkillsCustomizable";
+import { Clip4Carousel54Cents } from "./compositions/Clip4Carousel54Cents";
+import { Clip5ThumbnailExactlyWanted } from "./compositions/Clip5ThumbnailExactlyWanted";
+import { Clip6ContentOnlyHalf } from "./compositions/Clip6ContentOnlyHalf";
+import { Clip7PostedThreePlatforms } from "./compositions/Clip7PostedThreePlatforms";
 
 // Word-level timing data
 import { TOTAL_DURATION_FRAMES as CLIP6_V3_DURATION } from "./data/clip6-voice-control-words";
@@ -190,6 +199,99 @@ export const RemotionRoot: React.FC = () => {
         }}
       />
 
+      {/* ── CLAUDE CREATIVES BATCH 2 (2026-03-02) ─────────── */}
+
+      {/* Pipeline Clip 1: Cloud Code Creates All My Visual Content (74s, 6 pop-outs) */}
+      <Composition
+        id="Clip1CloudCreativesHook"
+        component={Clip1CloudCreativesHook}
+        durationInFrames={2246}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-01-cloud-code-creates-all-my-visual-content.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 2: One Problem with My AI Social Media Manager (75s, 7 pop-outs) */}
+      <Composition
+        id="Clip2OneProblemAiManager"
+        component={Clip2OneProblemAiManager}
+        durationInFrames={2250}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-02-one-problem-with-my-ai-social-media-manager.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 3: AI Skills Fully Customizable to Your Needs (89s, 6 pop-outs) */}
+      <Composition
+        id="Clip3SkillsCustomizable"
+        component={Clip3SkillsCustomizable}
+        durationInFrames={2847}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-03-ai-skills-fully-customizable-to-your-needs.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 4: AI Generated Six-Slide Carousel for 54 Cents (79s, 6 pop-outs) */}
+      <Composition
+        id="Clip4Carousel54Cents"
+        component={Clip4Carousel54Cents}
+        durationInFrames={2515}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-04-ai-generated-six-slide-carousel-54-cents.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 5: Thumbnail — AI Created Exactly What I Wanted (96s, 7 pop-outs) */}
+      <Composition
+        id="Clip5ThumbnailExactlyWanted"
+        component={Clip5ThumbnailExactlyWanted}
+        durationInFrames={3007}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-05-thumbnail-ai-created-exactly-what-i-wanted.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 6: Content is Only Half Without Client Pipeline (56s, 6 pop-outs) */}
+      <Composition
+        id="Clip6ContentOnlyHalf"
+        component={Clip6ContentOnlyHalf}
+        durationInFrames={1680}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-06-content-is-only-half-without-client-pipeline.mp4",
+        }}
+      />
+
+      {/* Pipeline Clip 7: AI Agent Posted Carousels to Three Platforms (51s, 4 pop-outs) */}
+      <Composition
+        id="Clip7PostedThreePlatforms"
+        component={Clip7PostedThreePlatforms}
+        durationInFrames={1693}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-03-02-claude-creatives/clip-07-ai-agent-posted-carousels-to-three-platforms.mp4",
+        }}
+      />
+
       {/* ── PODCAST TEST ──────────────────────────────────────── */}
 
       {/* Podcast Test: "The Stress Expert" — Leadership & Vulnerability (120s, 9 pop-outs) */}
@@ -203,6 +305,31 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           videoSrc: "videos/2026-02-23-podcast-test/reframed-split.mp4",
         }}
+      />
+
+      {/* Podcast V2: Neo-Brutalist + INFINITX Orange (120s, 8 pop-outs + mixed components) */}
+      <Composition
+        id="PodcastStressExpertV2"
+        component={PodcastStressExpertV2}
+        durationInFrames={3600}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
+        defaultProps={{
+          videoSrc: "videos/2026-02-23-podcast-test/reframed-split.mp4",
+        }}
+      />
+
+      {/* ── STANDALONE MOTION GRAPHICS ───────────────────────── */}
+
+      {/* Standalone: "Tool Calling 2.0" — Anthropic programmatic tool calling (30s, no source video) */}
+      <Composition
+        id="ToolCalling2Point0"
+        component={ToolCalling2Point0}
+        durationInFrames={900}
+        fps={VIDEO_FPS}
+        width={RESOLUTIONS.portrait.width}
+        height={RESOLUTIONS.portrait.height}
       />
     </>
   );

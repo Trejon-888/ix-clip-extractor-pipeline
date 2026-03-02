@@ -26,3 +26,15 @@ Thumbs.db
 
 # Renders
 remotion/out/
+output/
+
+# Test/preview HTML files
+tools/test_*.html
+tools/preview_*.html
+tools/preview_overlays/
+
+# Screenshots / images
+public/videos/**/*.png
+public/videos/**/*.jpg
+*.png
+*.jpg
