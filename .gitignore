@@ -38,3 +38,10 @@ public/videos/**/*.png
 public/videos/**/*.jpg
 *.png
 *.jpg
+
+# Exceptions — tracked assets
+!public/header-banner.jpg
+!public/infinitx-logo.png
+!public/logos/*.svg
+!public/logos/*.png
+!public/logos/*.webp

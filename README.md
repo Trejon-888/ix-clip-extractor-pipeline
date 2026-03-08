@@ -1,6 +1,31 @@
-# IX Clip Pipeline
+<p align="center">
+  <img src="public/header-banner.jpg" alt="IX Clip Extractor Pipeline — Long-form to short-form video transformation" width="100%" />
+</p>
 
-Automated video clip extraction, face-tracking reframe, and Remotion editing pipeline. Turn any long-form video into polished, platform-ready short-form clips.
+<p align="center">
+  <img src="public/infinitx-logo.png" alt="INFINITX" width="60" />
+</p>
+
+<h1 align="center">IX Clip Extractor Pipeline</h1>
+
+<p align="center">
+  Turn any long-form video into polished, platform-ready short-form clips.<br/>
+  Face-tracking reframe, AI-powered clip selection, Remotion editing, and multi-platform distribution.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Remotion-4.0-6C47FF?logo=react&logoColor=white" alt="Remotion" />
+  <img src="https://img.shields.io/badge/Claude_Code-Powered-FF6B00?logo=anthropic&logoColor=white" alt="Claude Code" />
+  <img src="https://img.shields.io/badge/FFmpeg-Required-007808?logo=ffmpeg&logoColor=white" alt="FFmpeg" />
+</p>
+
+<p align="center">
+  <a href="https://getlate.dev?atp=enriquemarq"><img src="https://img.shields.io/badge/Distribute_with-Late-000000?style=for-the-badge&logoColor=white" alt="Late — Social Media Distribution" /></a>
+</p>
+
+---
 
 ## What This Does
 
@@ -10,7 +35,7 @@ Long-form video (16:9)
   → Face-Tracking Extraction (MediaPipe, EMA smoothing, auto-layout detection)
   → Transcription (WhisperX GPU, word-level timestamps)
   → Remotion Editing (illustrations, SFX, captions, motion graphics)
-  → Polished 9:16 Shorts (ready for YouTube, Instagram, TikTok)
+  → Multi-Platform Distribution (YouTube, Instagram, TikTok, and more)
 ```
 
 ## Quickstart
@@ -43,10 +68,10 @@ npm run studio
 
 ## Requirements
 
-- **Node.js 18+** (for Remotion)
-- **Python 3.10+** (for clip extractor)
-- **FFmpeg** (must be on PATH)
-- **NVIDIA GPU** (optional, 5-10x faster rendering with NVENC)
+- **Node.js 18+** — Remotion video engine
+- **Python 3.10+** — Clip extractor and face tracking
+- **FFmpeg** — Must be on PATH
+- **NVIDIA GPU** — Optional but recommended (5-10x faster with NVENC)
 
 ## Architecture
 
@@ -113,17 +138,20 @@ Programmatic video composition with pop-out overlays, illustrations, SFX, and wo
 - `KineticText` — Per-character spring animation
 - `PhraseCaption` / `WordByWordCaption` — Caption systems
 
-**Gold standard compositions (study these):**
+**22 compositions included** — 5 gold standards to study, plus 17 real-world examples across pipeline clips, podcast edits, and standalone motion graphics.
 
-| Composition | Type | Pop-Outs | File |
-|-------------|------|----------|------|
-| `Clip1FromZeroTo90K` | Pipeline clip | 9 | `compositions/Clip1FromZeroTo90K.tsx` |
-| `Clip2StopManuallyPosting` | Pipeline clip | 14+ | `compositions/Clip2StopManuallyPosting.tsx` |
-| `Clip6VoiceControlDemoV3` | Standalone demo | 5-7 | `compositions/Clip6VoiceControlDemoV3.tsx` |
-| `ClaudeOpus46Announcement` | Announcement | 18 | `compositions/ClaudeOpus46Announcement.tsx` |
-| `CraftingOutreachCampaign` | Long-form | 35+ | `compositions/CraftingOutreachCampaign.tsx` |
+| Composition | Type | Description |
+|-------------|------|-------------|
+| `Clip1FromZeroTo90K` | Pipeline clip | Partner success story (76s, 9 pop-outs) |
+| `Clip2StopManuallyPosting` | Pipeline clip | Voice prompt demo (78s, 14+ pop-outs) |
+| `Clip6VoiceControlDemoV3` | Standalone demo | Tier system with AppleStylePopup (70s) |
+| `ClaudeOpus46Announcement` | Announcement | Full-screen talking head (130s, 18 pop-outs) |
+| `CraftingOutreachCampaign` | Long-form | Screen-share tutorial (28 min, 35+ pop-outs) |
+| `PodcastStressExpert` | Podcast | Layout-aware captions, split-screen (120s) |
+| `ToolCalling2Point0` | Motion graphics | Standalone animated piece (30s, no source video) |
+| *+ 15 more pipeline clips* | Various | Claude Creatives batch 1 & 2, content clips |
 
-**60+ reusable illustrations** in `remotion/lib/illustrations/` — all SVG components with motion.
+**60 reusable illustration components** in `remotion/lib/illustrations/` — all SVG with built-in motion.
 
 ### Claude Code Skills (`.claude/skills/`)
 
@@ -142,7 +170,7 @@ Programmatic video composition with pop-out overlays, illustrations, SFX, and wo
 | short-form-posting | `/post-short` | Multi-platform publishing |
 | youtube-content-package | `/youtube-package` | Full YouTube package (title, tags, description, thumbnail) |
 | video-upload-helper | `/upload-video` | Compress + upload to storage |
-| late-social-media | `/post-to` | Post to 13+ platforms via Late API |
+| late-social-media | `/post-to` | Post to 13+ platforms via [Late](https://getlate.dev?atp=enriquemarq) |
 | content-analytics | `/analytics` | Track post performance |
 
 ## Full Pipeline Walkthrough
@@ -206,11 +234,14 @@ This creates a polished Remotion composition with illustrations, SFX, and captio
 npx remotion render remotion/index.ts MyClip01 out/my-clip-01.mp4 --codec h264
 ```
 
-### Step 8: Publish (optional)
+### Step 8: Distribute with [Late](https://getlate.dev?atp=enriquemarq)
 
+Publish to 13+ platforms at once from a single command:
 ```
 /post-short out/my-clip-01.mp4
 ```
+
+This generates platform-tailored content packages (different copy, hashtags, and formatting per platform) and publishes to YouTube Shorts, Instagram Reels, TikTok, LinkedIn, X, Threads, Bluesky, and more — all through [Late](https://getlate.dev?atp=enriquemarq)'s unified API.
 
 ## Configuration
 
@@ -254,19 +285,53 @@ npx remotion render remotion/index.ts MyClip01 out/my-clip-01.mp4 --codec h264
 ## Directory Structure
 
 ```
-ix-clip-pipeline/
+ix-clip-extractor-pipeline/
 ├── tools/clip_extractor/     # Python face-tracking extraction engine
 ├── remotion/
 │   ├── components/           # Overlay components (ConceptOverlay, AppleStylePopup, etc.)
-│   ├── compositions/         # Gold standard examples (5 compositions)
+│   ├── compositions/         # 22 compositions (5 gold standards + 17 examples)
 │   ├── data/                 # Word-level timing data + SRT converter
-│   ├── lib/                  # Config, colors, 60+ illustration components
+│   ├── lib/                  # Config, colors, 60 illustration components
 │   └── playbook/             # Creative direction rules
 ├── public/
-│   ├── logos/                # 13 platform SVGs + brand logos
+│   ├── logos/                # 24 platform + brand SVGs
 │   └── audio/                # SFX library (pop, whoosh, click, music)
 └── .claude/skills/           # 13 Claude Code skill integrations
 ```
+
+## Content Distribution Partner
+
+<a href="https://getlate.dev?atp=enriquemarq">
+  <img src="https://img.shields.io/badge/Late-Content_Distribution-000000?style=for-the-badge&logoColor=white" alt="Late" />
+</a>
+
+This pipeline distributes to **13+ platforms** through [Late](https://getlate.dev?atp=enriquemarq) — a single API call handles platform-specific formatting, scheduling, and publishing across YouTube Shorts, Instagram Reels, TikTok, LinkedIn, X, Threads, Bluesky, Facebook, Pinterest, Snapchat, Reddit, Telegram, and Google Business.
+
+**Why Late:**
+- One request, all platforms — no per-platform API integrations to maintain
+- Per-platform content customization (different copy, hashtags, aspect ratios)
+- Scheduling with timezone support
+- Media upload via presigned URLs (no size limits, no third-party hosting)
+- Creator-friendly — built for workflows like this pipeline
+
+Get started as a creator: **[getlate.dev](https://getlate.dev?atp=enriquemarq)**
+
+## Built With
+
+- **[Remotion](https://www.remotion.dev/)** — Programmatic video engine
+- **[Claude Code](https://claude.ai/claude-code)** — AI-powered editing orchestration
+- **[Late](https://getlate.dev?atp=enriquemarq)** — Multi-platform content distribution (13+ platforms)
+- **[MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector)** — Face detection for intelligent reframing
+- **[WhisperX](https://github.com/m-bain/whisperX)** — Word-level transcription with GPU acceleration
+- **[Nano Banana Pro](https://kie.ai)** — AI image generation (header image, thumbnails)
+
+## Author
+
+**Enrique Marq** — [@enriquemarq-0](https://youtube.com/@enriquemarq-0)
+
+- [YouTube](https://youtube.com/@enriquemarq-0)
+- [LinkedIn](https://linkedin.com/in/enrique-marq-756191319/)
+- [Instagram](https://instagram.com/kikefuturo_)
 
 ## License
 

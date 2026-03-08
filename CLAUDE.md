@@ -1,4 +1,4 @@
-# IX Clip Pipeline
+# IX Clip Extractor Pipeline
 
 ## What This Is
 
@@ -14,7 +14,7 @@ Automated clip extraction + face-tracking reframe + Remotion video editing pipel
 2. **Clip Extraction** — Face-tracking reframe (16:9 → 9:16) via Python tool at `tools/clip_extractor/`
 3. **Transcription** — WhisperX GPU (`device='cuda'`, `compute_type='float16'`) → word-level timestamps
 4. **Editing** — `/edit` routes to `video-editing` (router) → `short-form-editing` or `long-form-editing`
-5. **Publishing** — `/short-form-posting` or `/youtube-content-package`
+5. **Publishing** — `/short-form-posting` or `/youtube-content-package` via [Late](https://getlate.dev?atp=enriquemarq)
 
 ### Podcast/Interview Pipeline
 
@@ -111,6 +111,7 @@ Study these compositions for patterns:
 ### Brand Logos
 - Claude Code: `logos/claude-code-terminal.webp`
 - Claude AI: `logos/claude-ai-icon.svg`
+- Anthropic: `logos/anthropic-icon.png`, `logos/anthropic-logo.svg`
 - INFINITX: `infinitx-logo.png`
 
 ### SFX Library (`public/audio/`)
